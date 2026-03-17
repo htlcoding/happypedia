@@ -1,58 +1,180 @@
 <script setup>
-const featuredArticle = {
-  tag: 'Ernährung',
-  title: 'Die 10 gesündesten Snacks für Kinder unter 5 Jahren',
-  excerpt: 'Kleine Mägen, großer Hunger – wir zeigen, welche Snacks wirklich satt machen und dabei gesund sind. Von Obst bis Gemüse: Diese Ideen sind schnell gemacht und bei Kindern beliebt.',
-  author: 'Dr. Anna Müller',
-  date: '03.03.2026',
-  img: 'https://placehold.co/860x420/c8e6c9/388e3c?text=Featured+Artikel',
+import { ref, onMounted, computed } from 'vue'
+import { fetchArticles, seedArticles } from './services/api'
+
+// ── State ──────────────────────────────────────────────
+const articles = ref([])
+const loading = ref(true)
+const error = ref(null)
+
+// ── Hardcoded Fallback-Daten (bis Backend läuft) ──────
+const fallbackArticles = [
+  {
+    id: 1,
+    title: 'Wiener Startup entwickelt App gegen Lebensmittelverschwendung',
+    url: 'https://example.com/wiener-startup-food',
+    source: 'derstandard.at',
+    publishedAt: '2026-03-16T10:00:00Z',
+    score: 92,
+  },
+  {
+    id: 2,
+    title: 'Neue Studie: Ehrenamt stärkt mentale Gesundheit nachweislich',
+    url: 'https://example.com/ehrenamt-studie',
+    source: 'zeit.de',
+    publishedAt: '2026-03-15T08:30:00Z',
+    score: 88,
+  },
+  {
+    id: 3,
+    title: 'Solarenergie-Rekord in Deutschland: 60% des Stroms aus Erneuerbaren',
+    url: 'https://example.com/solar-rekord',
+    source: 'tagesschau.de',
+    publishedAt: '2026-03-16T14:00:00Z',
+    score: 95,
+  },
+  {
+    id: 4,
+    title: 'Schweizer Forscher finden neuen Ansatz gegen Antibiotikaresistenz',
+    url: 'https://example.com/antibiotika-forschung',
+    source: 'nzz.ch',
+    publishedAt: '2026-03-14T12:00:00Z',
+    score: 85,
+  },
+  {
+    id: 5,
+    title: 'Community Gardens in Graz: Nachbarschaft wächst zusammen',
+    url: 'https://example.com/community-gardens-graz',
+    source: 'kleinezeitung.at',
+    publishedAt: '2026-03-17T06:00:00Z',
+    score: 78,
+  },
+  {
+    id: 6,
+    title: 'Berliner Schüler gewinnen internationalen Robotik-Wettbewerb',
+    url: 'https://example.com/robotik-berlin',
+    source: 'spiegel.de',
+    publishedAt: '2026-03-15T16:00:00Z',
+    score: 82,
+  },
+  {
+    id: 7,
+    title: 'Neues Bildungsprogramm macht Coding für alle Altersgruppen zugänglich',
+    url: 'https://example.com/coding-bildung',
+    source: 'golem.de',
+    publishedAt: '2026-03-13T09:00:00Z',
+    score: 74,
+  },
+  {
+    id: 8,
+    title: 'Österreich investiert Milliarden in Bahnausbau für klimafreundliches Reisen',
+    url: 'https://example.com/bahn-ausbau-at',
+    source: 'orf.at',
+    publishedAt: '2026-03-17T12:00:00Z',
+    score: 90,
+  },
+]
+
+// ── API-Aufruf ────────────────────────────────────────
+onMounted(async () => {
+  try {
+    const data = await fetchArticles()
+    articles.value = data.length > 0 ? data : fallbackArticles
+  } catch (e) {
+    console.warn('Backend nicht erreichbar, nutze Fallback-Daten:', e)
+    error.value = 'Backend nicht erreichbar – zeige Platzhalter-Daten.'
+    articles.value = fallbackArticles
+  } finally {
+    loading.value = false
+  }
+})
+
+// ── Computed: Aufteilen in Featured / Main / Sidebar ──
+const featuredArticle = computed(() => {
+  if (articles.value.length === 0) return null
+  // Höchster Score = Featured
+  return articles.value[0]
+})
+
+const mainArticles = computed(() => {
+  return articles.value.slice(1, 4)
+})
+
+const sidebarArticles = computed(() => {
+  return articles.value.slice(4, 8)
+})
+
+// ── Hilfsfunktionen ───────────────────────────────────
+function formatDate(isoDate) {
+  const d = new Date(isoDate)
+  return d.toLocaleDateString('de-AT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
 }
 
-const mainArticles = [
-  {
-    tag: 'Gesundheit',
-    tag2: 'Ratgeber',
-    title: 'Impfkalender 2026: Was Eltern jetzt wissen müssen',
-    excerpt: 'Die STIKO hat neue Empfehlungen herausgegeben. Wir erklären, welche Impfungen wann fällig sind.',
-    author: 'Dr. Markus Weber',
-    date: '02.03.2026',
-    img: 'https://placehold.co/520x280/e8f5e9/4caf50?text=Gesundheit',
-  },
-  {
-    tag: 'Bildung',
-    tag2: 'Schule',
-    title: 'Lernen mit Spaß: Die besten Lern-Apps 2026 im Test',
-    excerpt: 'Wir haben 15 Lern-Apps unter die Lupe genommen und verraten, welche wirklich fördern.',
-    author: 'Sandra Klein',
-    date: '01.03.2026',
-    img: 'https://placehold.co/520x280/e8f5e9/4caf50?text=Bildung',
-  },
-  {
-    tag: 'Schlaf',
-    tag2: 'Baby',
-    title: 'Einschlafroutinen: So schläft dein Baby durch die Nacht',
-    excerpt: 'Schlafmangel ist für viele Eltern das größte Problem. Expertin erklärt, was wirklich hilft.',
-    author: 'Laura Bauer',
-    date: '28.02.2026',
-    img: 'https://placehold.co/520x280/e8f5e9/4caf50?text=Schlaf',
-  },
-]
+function formatDateLong() {
+  const now = new Date()
+  return now.toLocaleDateString('de-AT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
 
-const sidebarArticles = [
-  { tag: 'Spielzeug', title: 'Die 5 sichersten Spielzeuge für Kleinkinder', date: '03.03.2026', img: 'https://placehold.co/90x70/e8f5e9/4caf50?text=🧸' },
-  { tag: 'Aktivität', title: 'Bewegung im Winter: Ideen für drinnen', date: '02.03.2026', img: 'https://placehold.co/90x70/e8f5e9/4caf50?text=🏃' },
-  { tag: 'Ernährung', title: 'Zuckerfrei kochen für die ganze Familie', date: '01.03.2026', img: 'https://placehold.co/90x70/e8f5e9/4caf50?text=🍎' },
-  { tag: 'Gesundheit', title: 'Wann zum Arzt? Die wichtigsten Warnsignale', date: '28.02.2026', img: 'https://placehold.co/90x70/e8f5e9/4caf50?text=❤️' },
-]
+// Platzhalter-Bild basierend auf Source
+function getPlaceholderImg(source, size) {
+  const dims = {
+    featured: '860x420',
+    card: '520x280',
+    sidebar: '90x70',
+  }
+  // Farbe je nach Source
+  const colors = {
+    featured: 'c8e6c9/388e3c',
+    card: 'e8f5e9/4caf50',
+    sidebar: 'e8f5e9/4caf50',
+  }
+  const label = encodeURIComponent(source)
+  return `https://placehold.co/${dims[size]}/${colors[size]}?text=${label}`
+}
 
+// Score → Tag-Kategorie (Platzhalter bis echte Kategorien kommen)
+function getTagForArticle(article) {
+  if (article.score >= 90) return 'Top Story'
+  if (article.score >= 80) return 'Empfohlen'
+  if (article.score >= 70) return 'Lesenswert'
+  return 'Aktuell'
+}
+
+// ── Kategorien (statisch) ─────────────────────────────
 const categories = [
-  { icon: '🍎', name: 'Ernährung' },
-  { icon: '🧸', name: 'Spielzeug' },
-  { icon: '📚', name: 'Bildung' },
-  { icon: '💤', name: 'Schlaf' },
-  { icon: '🏃', name: 'Aktivität' },
-  { icon: '❤️', name: 'Gesundheit' },
+  { icon: '🌍', name: 'Welt' },
+  { icon: '🇦🇹', name: 'Österreich' },
+  { icon: '🇩🇪', name: 'Deutschland' },
+  { icon: '🇨🇭', name: 'Schweiz' },
+  { icon: '💡', name: 'Innovation' },
+  { icon: '❤️', name: 'Gesellschaft' },
 ]
+
+// ── Seed-Button (Dev-Hilfe) ───────────────────────────
+const seeding = ref(false)
+async function handleSeed() {
+  seeding.value = true
+  try {
+    const msg = await seedArticles()
+    alert(msg)
+    // Reload
+    const data = await fetchArticles()
+    articles.value = data
+  } catch (e) {
+    alert('Seed fehlgeschlagen: ' + e.message)
+  } finally {
+    seeding.value = false
+  }
+}
 </script>
 
 <template>
@@ -61,8 +183,8 @@ const categories = [
     <!-- TOP BAR -->
     <div class="hp-topbar">
       <div class="container d-flex justify-content-between align-items-center">
-        <span>Deine Plattform für Happy Nachrichten aus der gesamten Welt!</span>
-        <span>Dienstag, 3. März 2026</span>
+        <span>Deine Plattform für positive Nachrichten aus der gesamten Welt!</span>
+        <span>{{ formatDateLong() }}</span>
       </div>
     </div>
 
@@ -93,51 +215,79 @@ const categories = [
       </div>
     </nav>
 
+    <!-- LOADING STATE -->
+    <div v-if="loading" class="container py-5 text-center">
+      <p>Lade Artikel...</p>
+    </div>
+
     <!-- MAIN CONTENT -->
-    <main class="container py-4">
+    <main v-else class="container py-4">
+
+      <!-- Dev-Hinweis bei Fallback -->
+      <div v-if="error" class="alert alert-warning d-flex justify-content-between align-items-center mb-3">
+        <span>⚠️ {{ error }}</span>
+        <button class="btn btn-sm btn-outline-success" :disabled="seeding" @click="handleSeed">
+          {{ seeding ? 'Seeding...' : '🌱 Seed Testdaten' }}
+        </button>
+      </div>
+
       <div class="row g-4">
 
         <!-- LEFT COLUMN -->
         <div class="col-lg-8">
 
           <!-- FEATURED ARTICLE -->
-          <article class="hp-featured mb-4">
-            <div class="hp-featured-wrap">
-              <img :src="featuredArticle.img" :alt="featuredArticle.title" class="hp-featured-img" />
+          <article v-if="featuredArticle" class="hp-featured mb-4">
+            <a :href="featuredArticle.url" target="_blank" class="hp-featured-wrap">
+              <img
+                :src="getPlaceholderImg(featuredArticle.source, 'featured')"
+                :alt="featuredArticle.title"
+                class="hp-featured-img"
+              />
               <div class="hp-featured-overlay">
-                <span class="hp-tag hp-tag-white mb-2 d-inline-block">{{ featuredArticle.tag }}</span>
+                <span class="hp-tag hp-tag-white mb-2 d-inline-block">
+                  {{ getTagForArticle(featuredArticle) }}
+                </span>
                 <h1 class="hp-featured-title">{{ featuredArticle.title }}</h1>
-                <p class="hp-featured-excerpt d-none d-md-block">{{ featuredArticle.excerpt }}</p>
                 <div class="hp-meta">
-                  <span>✍️ {{ featuredArticle.author }}</span>
+                  <span>📰 {{ featuredArticle.source }}</span>
                   <span class="hp-dot">·</span>
-                  <span>{{ featuredArticle.date }}</span>
+                  <span>{{ formatDate(featuredArticle.publishedAt) }}</span>
+                  <span class="hp-dot">·</span>
+                  <span>⭐ Score: {{ featuredArticle.score }}</span>
                 </div>
               </div>
-            </div>
+            </a>
           </article>
 
           <!-- SECTION HEADING -->
           <div class="hp-section-head mb-3">
-            <h2 class="hp-section-title">Aktuelle Ratgeber</h2>
+            <h2 class="hp-section-title">Aktuelle Happy News</h2>
           </div>
 
           <!-- ARTICLE GRID -->
           <div class="row g-3">
-            <div v-for="art in mainArticles" :key="art.title" class="col-sm-6 col-lg-4">
+            <div v-for="art in mainArticles" :key="art.id" class="col-sm-6 col-lg-4">
               <article class="hp-card h-100">
-                <a href="#"><img :src="art.img" :alt="art.title" class="hp-card-img" /></a>
+                <a :href="art.url" target="_blank">
+                  <img
+                    :src="getPlaceholderImg(art.source, 'card')"
+                    :alt="art.title"
+                    class="hp-card-img"
+                  />
+                </a>
                 <div class="hp-card-body">
                   <div class="mb-2">
-                    <span class="hp-tag">{{ art.tag }}</span>
-                    <span class="hp-tag hp-tag-outline ms-1">{{ art.tag2 }}</span>
+                    <span class="hp-tag">{{ getTagForArticle(art) }}</span>
+                    <span class="hp-tag hp-tag-outline ms-1">{{ art.source }}</span>
                   </div>
-                  <h3 class="hp-card-title"><a href="#">{{ art.title }}</a></h3>
-                  <p class="hp-card-excerpt">{{ art.excerpt }}</p>
+                  <h3 class="hp-card-title">
+                    <a :href="art.url" target="_blank">{{ art.title }}</a>
+                  </h3>
                   <div class="hp-meta mt-2">
-                    <span>{{ art.author }}</span>
+                    <span>{{ formatDate(art.publishedAt) }}</span>
                     <span class="hp-dot">·</span>
-                    <span>{{ art.date }}</span>
+                    <span>⭐ {{ art.score }}</span>
                   </div>
                 </div>
               </article>
@@ -155,7 +305,7 @@ const categories = [
           <!-- NEWSLETTER -->
           <div class="hp-widget hp-widget-green mb-4">
             <h5 class="hp-widget-title">💌 Newsletter</h5>
-            <p class="hp-widget-text">Wöchentlich die besten Tipps direkt ins Postfach.</p>
+            <p class="hp-widget-text">Wöchentlich die besten positiven News direkt ins Postfach.</p>
             <input type="email" class="form-control hp-input mb-2" placeholder="deine@email.de" />
             <button class="btn hp-btn-white w-100">Kostenlos anmelden</button>
           </div>
@@ -170,17 +320,27 @@ const categories = [
             </div>
           </div>
 
-          <!-- MEIST GELESEN -->
+          <!-- MEIST GELESEN / TOP SCORED -->
           <div class="hp-widget mb-4">
-            <h5 class="hp-widget-title hp-widget-title-dark">🔥 Meist gelesen</h5>
+            <h5 class="hp-widget-title hp-widget-title-dark">🔥 Höchster Score</h5>
             <div class="hp-sidebar-list">
-              <a v-for="(art, i) in sidebarArticles" :key="art.title" href="#" class="hp-sidebar-item">
+              <a
+                v-for="(art, i) in sidebarArticles"
+                :key="art.id"
+                :href="art.url"
+                target="_blank"
+                class="hp-sidebar-item"
+              >
                 <span class="hp-sidebar-num">{{ i + 1 }}</span>
-                <img :src="art.img" :alt="art.title" class="hp-sidebar-img" />
+                <img
+                  :src="getPlaceholderImg(art.source, 'sidebar')"
+                  :alt="art.title"
+                  class="hp-sidebar-img"
+                />
                 <div class="hp-sidebar-info">
-                  <span class="hp-tag hp-tag-xs">{{ art.tag }}</span>
+                  <span class="hp-tag hp-tag-xs">⭐ {{ art.score }}</span>
                   <p class="hp-sidebar-title">{{ art.title }}</p>
-                  <small class="hp-sidebar-date">{{ art.date }}</small>
+                  <small class="hp-sidebar-date">{{ art.source }} · {{ formatDate(art.publishedAt) }}</small>
                 </div>
               </a>
             </div>
@@ -198,15 +358,15 @@ const categories = [
             <a href="#" class="hp-brand text-decoration-none">
               <span class="hp-brand-badge">Happy</span><span class="hp-brand-pedia" style="color:#a5d6a7">Pedia</span>
             </a>
-            <p class="hp-footer-text mt-2">Dein verlässlicher Ratgeber rund um Kinder, Gesundheit und Familie.</p>
+            <p class="hp-footer-text mt-2">Positive Nachrichten aus dem DACH-Raum und der Welt.</p>
           </div>
           <div class="col-6 col-lg-2">
-            <h6 class="hp-footer-heading">Themen</h6>
+            <h6 class="hp-footer-heading">Regionen</h6>
             <ul class="list-unstyled hp-footer-links">
-              <li><a href="#">Ernährung</a></li>
-              <li><a href="#">Gesundheit</a></li>
-              <li><a href="#">Bildung</a></li>
-              <li><a href="#">Schlaf</a></li>
+              <li><a href="#">Österreich</a></li>
+              <li><a href="#">Deutschland</a></li>
+              <li><a href="#">Schweiz</a></li>
+              <li><a href="#">International</a></li>
             </ul>
           </div>
           <div class="col-6 col-lg-2">
@@ -214,7 +374,7 @@ const categories = [
             <ul class="list-unstyled hp-footer-links">
               <li><a href="#">Team</a></li>
               <li><a href="#">Kontakt</a></li>
-              <li><a href="#">Karriere</a></li>
+              <li><a href="#">Quellen</a></li>
             </ul>
           </div>
           <div class="col-6 col-lg-2">
