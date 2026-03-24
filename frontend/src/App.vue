@@ -3,11 +3,18 @@ import { ref, onMounted, computed } from 'vue'
 import { fetchArticles, seedArticles } from './services/api'
 
 // ── State ──────────────────────────────────────────────
-const articles = ref([])
-const loading = ref(true)
-const error = ref(null)
+const articles        = ref([])
+const loading         = ref(true)
+const error           = ref(null)
+const selectedArticle = ref(null)   // für Detail-Ansicht
+const commentInput    = ref('')
 
-// ── Hardcoded Fallback-Daten (bis Backend läuft) ──────
+// Likes & Kommentare (lokal, bis Backend da ist)
+const likes    = ref({})   // { articleId: count }
+const liked    = ref({})   // { articleId: bool }
+const comments = ref({})   // { articleId: [{ author, text, date }] }
+
+// ── Fallback-Daten ────────────────────────────────────
 const fallbackArticles = [
   {
     id: 1,
@@ -16,6 +23,7 @@ const fallbackArticles = [
     source: 'derstandard.at',
     publishedAt: '2026-03-16T10:00:00Z',
     score: 92,
+    summary: 'Ein junges Wiener Startup hat eine App entwickelt, die Supermärkte und Restaurants dabei hilft, überschüssige Lebensmittel an Bedürftige weiterzugeben – und damit Tonnen von Lebensmittelabfällen zu vermeiden.',
   },
   {
     id: 2,
@@ -24,6 +32,7 @@ const fallbackArticles = [
     source: 'zeit.de',
     publishedAt: '2026-03-15T08:30:00Z',
     score: 88,
+    summary: 'Eine großangelegte Studie mit über 10.000 Teilnehmern belegt: Wer regelmäßig ehrenamtlich tätig ist, berichtet signifikant seltener von Burnout, Einsamkeit und Depressionen.',
   },
   {
     id: 3,
@@ -32,6 +41,7 @@ const fallbackArticles = [
     source: 'tagesschau.de',
     publishedAt: '2026-03-16T14:00:00Z',
     score: 95,
+    summary: 'Deutschland hat einen neuen Rekord bei erneuerbaren Energien aufgestellt: An einem sonnigen Frühlingstag deckten Solar-, Wind- und Wasserkraft gemeinsam 60 % des gesamten Strombedarfs.',
   },
   {
     id: 4,
@@ -40,6 +50,7 @@ const fallbackArticles = [
     source: 'nzz.ch',
     publishedAt: '2026-03-14T12:00:00Z',
     score: 85,
+    summary: 'Forschende der ETH Zürich haben einen molekularen Mechanismus entdeckt, der resistente Bakterien wieder für bestehende Antibiotika empfänglich machen könnte – ein Durchbruch für die Medizin.',
   },
   {
     id: 5,
@@ -48,6 +59,7 @@ const fallbackArticles = [
     source: 'kleinezeitung.at',
     publishedAt: '2026-03-17T06:00:00Z',
     score: 78,
+    summary: 'In Graz entstehen immer mehr Gemeinschaftsgärten, in denen Menschen verschiedener Herkunft gemeinsam anbauen, kochen und feiern. Ein Grazer Verein koordiniert mittlerweile 24 solcher Projekte.',
   },
   {
     id: 6,
@@ -56,6 +68,7 @@ const fallbackArticles = [
     source: 'spiegel.de',
     publishedAt: '2026-03-15T16:00:00Z',
     score: 82,
+    summary: 'Ein Team der Geschwister-Scholl-Oberschule Berlin hat beim World Robot Olympiad den ersten Platz in der Kategorie "Future Engineers" belegt – und damit alle 47 Teilnehmerländer hinter sich gelassen.',
   },
   {
     id: 7,
@@ -64,6 +77,7 @@ const fallbackArticles = [
     source: 'golem.de',
     publishedAt: '2026-03-13T09:00:00Z',
     score: 74,
+    summary: 'Das neue Förderprogramm "CodeForAll" bietet kostenlosen Programmierunterricht für Kinder ab 6 Jahren bis hin zu Senioren – und verzeichnet bereits über 50.000 aktive Teilnehmer in Deutschland.',
   },
   {
     id: 8,
@@ -72,6 +86,7 @@ const fallbackArticles = [
     source: 'orf.at',
     publishedAt: '2026-03-17T12:00:00Z',
     score: 90,
+    summary: 'Das Klimaschutzministerium hat ein 18-Milliarden-Euro-Paket für den Ausbau des österreichischen Schienennetzes beschlossen – mit neuen Hochgeschwindigkeitstrassen und dichterem Regionalverkehr.',
   },
 ]
 
@@ -87,61 +102,79 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+
+  // Lokale Like/Comment-Initialisierung
+  const initId = (list) => list.forEach(a => {
+    likes.value[a.id]    = likes.value[a.id]    ?? Math.floor(Math.random() * 40 + 5)
+    liked.value[a.id]    = liked.value[a.id]    ?? false
+    comments.value[a.id] = comments.value[a.id] ?? []
+  })
+  initId(fallbackArticles)
 })
 
-// ── Computed: Aufteilen in Featured / Main / Sidebar ──
-const featuredArticle = computed(() => {
-  if (articles.value.length === 0) return null
-  // Höchster Score = Featured
-  return articles.value[0]
-})
+// ── Computed: Nach Score sortieren, dann aufteilen ───
+const sortedArticles = computed(() =>
+  [...articles.value].sort((a, b) => b.score - a.score)
+)
 
-const mainArticles = computed(() => {
-  return articles.value.slice(1, 4)
-})
+const featuredArticle = computed(() => sortedArticles.value[0] ?? null)
+const mainArticles    = computed(() => sortedArticles.value.slice(1, 4))
+const sidebarArticles = computed(() => sortedArticles.value.slice(0, 5))   // Top 5 im Sidebar
 
-const sidebarArticles = computed(() => {
-  return articles.value.slice(4, 8)
-})
+// ── Like-Logik ────────────────────────────────────────
+function toggleLike(id) {
+  if (liked.value[id]) {
+    likes.value[id]--
+    liked.value[id] = false
+  } else {
+    likes.value[id]++
+    liked.value[id] = true
+  }
+}
+
+// ── Kommentar-Logik ───────────────────────────────────
+function submitComment(articleId) {
+  const text = commentInput.value.trim()
+  if (!text) return
+  if (!comments.value[articleId]) comments.value[articleId] = []
+  comments.value[articleId].push({
+    author: 'Du',
+    text,
+    date: new Date().toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+  })
+  commentInput.value = ''
+}
+
+// ── Artikel öffnen / schließen ────────────────────────
+function openArticle(article) {
+  selectedArticle.value = article
+  commentInput.value    = ''
+  document.body.style.overflow = 'hidden'
+}
+function closeArticle() {
+  selectedArticle.value = null
+  document.body.style.overflow = ''
+}
 
 // ── Hilfsfunktionen ───────────────────────────────────
 function formatDate(isoDate) {
-  const d = new Date(isoDate)
-  return d.toLocaleDateString('de-AT', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
+  return new Date(isoDate).toLocaleDateString('de-AT', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
   })
 }
 
 function formatDateLong() {
-  const now = new Date()
-  return now.toLocaleDateString('de-AT', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  return new Date().toLocaleDateString('de-AT', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 }
 
-// Platzhalter-Bild basierend auf Source
 function getPlaceholderImg(source, size) {
-  const dims = {
-    featured: '860x420',
-    card: '520x280',
-    sidebar: '90x70',
-  }
-  // Farbe je nach Source
-  const colors = {
-    featured: 'c8e6c9/388e3c',
-    card: 'e8f5e9/4caf50',
-    sidebar: 'e8f5e9/4caf50',
-  }
-  const label = encodeURIComponent(source)
-  return `https://placehold.co/${dims[size]}/${colors[size]}?text=${label}`
+  const dims   = { featured: '860x420', card: '520x280', sidebar: '90x70', detail: '860x360' }
+  const colors = { featured: 'c8e6c9/388e3c', card: 'e8f5e9/4caf50', sidebar: 'dcedc8/558b2f', detail: 'c8e6c9/2e7d32' }
+  return `https://placehold.co/${dims[size]}/${colors[size]}?text=${encodeURIComponent(source)}`
 }
 
-// Score → Tag-Kategorie (Platzhalter bis echte Kategorien kommen)
 function getTagForArticle(article) {
   if (article.score >= 90) return 'Top Story'
   if (article.score >= 80) return 'Empfohlen'
@@ -149,7 +182,6 @@ function getTagForArticle(article) {
   return 'Aktuell'
 }
 
-// ── Kategorien (statisch) ─────────────────────────────
 const categories = [
   { icon: '🌍', name: 'Welt' },
   { icon: '🇦🇹', name: 'Österreich' },
@@ -159,14 +191,12 @@ const categories = [
   { icon: '❤️', name: 'Gesellschaft' },
 ]
 
-// ── Seed-Button (Dev-Hilfe) ───────────────────────────
 const seeding = ref(false)
 async function handleSeed() {
   seeding.value = true
   try {
-    const msg = await seedArticles()
+    const msg  = await seedArticles()
     alert(msg)
-    // Reload
     const data = await fetchArticles()
     articles.value = data
   } catch (e) {
@@ -217,17 +247,18 @@ async function handleSeed() {
 
     <!-- LOADING STATE -->
     <div v-if="loading" class="container py-5 text-center">
-      <p>Lade Artikel...</p>
+      <div class="hp-spinner"></div>
+      <p class="mt-3 text-muted">Lade Artikel…</p>
     </div>
 
     <!-- MAIN CONTENT -->
     <main v-else class="container py-4">
 
-      <!-- Dev-Hinweis bei Fallback -->
+      <!-- Fallback-Hinweis -->
       <div v-if="error" class="alert alert-warning d-flex justify-content-between align-items-center mb-3">
         <span>⚠️ {{ error }}</span>
         <button class="btn btn-sm btn-outline-success" :disabled="seeding" @click="handleSeed">
-          {{ seeding ? 'Seeding...' : '🌱 Seed Testdaten' }}
+          {{ seeding ? 'Seeding…' : '🌱 Seed Testdaten' }}
         </button>
       </div>
 
@@ -238,7 +269,8 @@ async function handleSeed() {
 
           <!-- FEATURED ARTICLE -->
           <article v-if="featuredArticle" class="hp-featured mb-4">
-            <a :href="featuredArticle.url" target="_blank" class="hp-featured-wrap">
+            <div class="hp-featured-wrap" @click="openArticle(featuredArticle)" role="button" tabindex="0"
+                 @keydown.enter="openArticle(featuredArticle)">
               <img
                 :src="getPlaceholderImg(featuredArticle.source, 'featured')"
                 :alt="featuredArticle.title"
@@ -255,9 +287,11 @@ async function handleSeed() {
                   <span>{{ formatDate(featuredArticle.publishedAt) }}</span>
                   <span class="hp-dot">·</span>
                   <span>⭐ Score: {{ featuredArticle.score }}</span>
+                  <span class="hp-dot">·</span>
+                  <span>👍 {{ likes[featuredArticle.id] }}</span>
                 </div>
               </div>
-            </a>
+            </div>
           </article>
 
           <!-- SECTION HEADING -->
@@ -268,26 +302,25 @@ async function handleSeed() {
           <!-- ARTICLE GRID -->
           <div class="row g-3">
             <div v-for="art in mainArticles" :key="art.id" class="col-sm-6 col-lg-4">
-              <article class="hp-card h-100">
-                <a :href="art.url" target="_blank">
-                  <img
-                    :src="getPlaceholderImg(art.source, 'card')"
-                    :alt="art.title"
-                    class="hp-card-img"
-                  />
-                </a>
+              <article class="hp-card h-100" @click="openArticle(art)" role="button" tabindex="0"
+                       @keydown.enter="openArticle(art)">
+                <img
+                  :src="getPlaceholderImg(art.source, 'card')"
+                  :alt="art.title"
+                  class="hp-card-img"
+                />
                 <div class="hp-card-body">
                   <div class="mb-2">
                     <span class="hp-tag">{{ getTagForArticle(art) }}</span>
                     <span class="hp-tag hp-tag-outline ms-1">{{ art.source }}</span>
                   </div>
-                  <h3 class="hp-card-title">
-                    <a :href="art.url" target="_blank">{{ art.title }}</a>
-                  </h3>
+                  <h3 class="hp-card-title">{{ art.title }}</h3>
                   <div class="hp-meta mt-2">
                     <span>{{ formatDate(art.publishedAt) }}</span>
                     <span class="hp-dot">·</span>
                     <span>⭐ {{ art.score }}</span>
+                    <span class="hp-dot">·</span>
+                    <span>👍 {{ likes[art.id] ?? 0 }}</span>
                   </div>
                 </div>
               </article>
@@ -320,16 +353,18 @@ async function handleSeed() {
             </div>
           </div>
 
-          <!-- MEIST GELESEN / TOP SCORED -->
+          <!-- TOP SCORED (korrekt nach Score sortiert) -->
           <div class="hp-widget mb-4">
             <h5 class="hp-widget-title hp-widget-title-dark">🔥 Höchster Score</h5>
             <div class="hp-sidebar-list">
-              <a
+              <div
                 v-for="(art, i) in sidebarArticles"
                 :key="art.id"
-                :href="art.url"
-                target="_blank"
                 class="hp-sidebar-item"
+                @click="openArticle(art)"
+                role="button"
+                tabindex="0"
+                @keydown.enter="openArticle(art)"
               >
                 <span class="hp-sidebar-num">{{ i + 1 }}</span>
                 <img
@@ -342,7 +377,7 @@ async function handleSeed() {
                   <p class="hp-sidebar-title">{{ art.title }}</p>
                   <small class="hp-sidebar-date">{{ art.source }} · {{ formatDate(art.publishedAt) }}</small>
                 </div>
-              </a>
+              </div>
             </div>
           </div>
 
@@ -397,5 +432,400 @@ async function handleSeed() {
       </div>
     </footer>
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- ARTIKEL-DETAIL MODAL                           -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <Transition name="modal-fade">
+      <div v-if="selectedArticle" class="hp-modal-backdrop" @click.self="closeArticle">
+        <div class="hp-modal" role="dialog" aria-modal="true">
+
+          <!-- Modal Header -->
+          <div class="hp-modal-header">
+            <div class="d-flex align-items-center gap-2">
+              <span class="hp-tag">{{ getTagForArticle(selectedArticle) }}</span>
+              <span class="hp-tag hp-tag-outline">{{ selectedArticle.source }}</span>
+            </div>
+            <button class="hp-modal-close" @click="closeArticle" aria-label="Schließen">✕</button>
+          </div>
+
+          <!-- Modal Body (scrollable) -->
+          <div class="hp-modal-body">
+
+            <!-- Hero Image -->
+            <img
+              :src="getPlaceholderImg(selectedArticle.source, 'detail')"
+              :alt="selectedArticle.title"
+              class="hp-modal-img"
+            />
+
+            <!-- Title & Meta -->
+            <div class="hp-modal-content">
+              <h2 class="hp-modal-title">{{ selectedArticle.title }}</h2>
+              <div class="hp-meta mb-3">
+                <span>📰 {{ selectedArticle.source }}</span>
+                <span class="hp-dot">·</span>
+                <span>{{ formatDate(selectedArticle.publishedAt) }}</span>
+                <span class="hp-dot">·</span>
+                <span>⭐ Score: {{ selectedArticle.score }}</span>
+              </div>
+
+              <!-- Summary / Artikel-Text -->
+              <p class="hp-modal-summary">
+                {{ selectedArticle.summary ?? 'Kein Kurztext verfügbar.' }}
+              </p>
+
+              <!-- Originallink -->
+              <a :href="selectedArticle.url" target="_blank" rel="noopener" class="btn hp-btn-outline mb-4">
+                🔗 Originalartikel öffnen
+              </a>
+
+              <!-- ─── LIKE / UPVOTE ─────────────────── -->
+              <div class="hp-like-section">
+                <button
+                  class="hp-like-btn"
+                  :class="{ 'hp-like-btn--active': liked[selectedArticle.id] }"
+                  @click="toggleLike(selectedArticle.id)"
+                >
+                  <span class="hp-like-icon">{{ liked[selectedArticle.id] ? '👍' : '👍' }}</span>
+                  <span class="hp-like-count">{{ likes[selectedArticle.id] ?? 0 }}</span>
+                  <span class="hp-like-label">{{ liked[selectedArticle.id] ? 'Geliked!' : 'Gefällt mir' }}</span>
+                </button>
+                <span class="hp-like-hint">Hilf anderen, gute Nachrichten zu finden.</span>
+              </div>
+
+              <!-- ─── KOMMENTARE ────────────────────── -->
+              <div class="hp-comments-section">
+                <h4 class="hp-comments-heading">
+                  💬 Kommentare
+                  <span class="hp-comments-count">({{ (comments[selectedArticle.id] ?? []).length }})</span>
+                </h4>
+
+                <!-- Kommentar-Liste -->
+                <div class="hp-comments-list">
+                  <div
+                    v-if="(comments[selectedArticle.id] ?? []).length === 0"
+                    class="hp-comments-empty"
+                  >
+                    Noch keine Kommentare. Schreib den ersten! 🌱
+                  </div>
+                  <div
+                    v-for="(c, idx) in (comments[selectedArticle.id] ?? [])"
+                    :key="idx"
+                    class="hp-comment"
+                  >
+                    <div class="hp-comment-avatar">{{ c.author[0] }}</div>
+                    <div class="hp-comment-body">
+                      <div class="hp-comment-meta">
+                        <strong>{{ c.author }}</strong>
+                        <span class="hp-comment-date">{{ c.date }}</span>
+                      </div>
+                      <p class="hp-comment-text">{{ c.text }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Kommentar schreiben -->
+                <div class="hp-comment-form">
+                  <textarea
+                    v-model="commentInput"
+                    class="hp-comment-input"
+                    placeholder="Dein Kommentar…"
+                    rows="3"
+                    @keydown.ctrl.enter="submitComment(selectedArticle.id)"
+                  ></textarea>
+                  <div class="d-flex justify-content-between align-items-center mt-2">
+                    <small class="text-muted">Ctrl + Enter zum Senden</small>
+                    <button
+                      class="btn hp-btn-sm"
+                      :disabled="!commentInput.trim()"
+                      @click="submitComment(selectedArticle.id)"
+                    >
+                      Kommentar senden ✉️
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /hp-modal-content -->
+          </div><!-- /hp-modal-body -->
+        </div><!-- /hp-modal -->
+      </div><!-- /backdrop -->
+    </Transition>
+
   </div>
 </template>
+
+<style scoped>
+/* ── Modal Transitions ──────────────────────────────── */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+.modal-fade-enter-active .hp-modal,
+.modal-fade-leave-active .hp-modal {
+  transition: transform 0.25s ease;
+}
+.modal-fade-enter-from .hp-modal {
+  transform: translateY(32px);
+}
+
+/* ── Backdrop ───────────────────────────────────────── */
+.hp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1050;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 2rem 1rem;
+}
+
+/* ── Modal Box ──────────────────────────────────────── */
+.hp-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 720px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  position: relative;
+}
+
+.hp-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e8f5e9;
+  background: #f9fbe7;
+}
+
+.hp-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: #555;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.hp-modal-close:hover {
+  background: #e8f5e9;
+}
+
+.hp-modal-body {
+  max-height: calc(100vh - 8rem);
+  overflow-y: auto;
+}
+
+.hp-modal-img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+.hp-modal-content {
+  padding: 1.5rem;
+}
+
+.hp-modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1b5e20;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+}
+
+.hp-modal-summary {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #444;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Like Button ────────────────────────────────────── */
+.hp-like-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #f1f8e9;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.hp-like-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border: 2px solid #a5d6a7;
+  background: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #388e3c;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.hp-like-btn:hover {
+  background: #e8f5e9;
+  border-color: #66bb6a;
+  transform: scale(1.04);
+}
+.hp-like-btn--active {
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: #fff;
+}
+.hp-like-btn--active:hover {
+  background: #388e3c;
+}
+
+.hp-like-icon  { font-size: 1.1rem; }
+.hp-like-count { font-size: 1.1rem; }
+.hp-like-label { font-size: 0.85rem; }
+.hp-like-hint  { font-size: 0.8rem; color: #666; }
+
+/* ── Comments ───────────────────────────────────────── */
+.hp-comments-section {
+  border-top: 2px solid #e8f5e9;
+  padding-top: 1.5rem;
+}
+
+.hp-comments-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1b5e20;
+  margin-bottom: 1rem;
+}
+.hp-comments-count {
+  font-weight: 400;
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.hp-comments-empty {
+  text-align: center;
+  color: #999;
+  padding: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.hp-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.hp-comment {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.hp-comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #a5d6a7;
+  color: #1b5e20;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hp-comment-body {
+  background: #f9fbe7;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  flex: 1;
+}
+
+.hp-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+}
+.hp-comment-date {
+  color: #999;
+  font-weight: 400;
+}
+.hp-comment-text {
+  margin: 0;
+  font-size: 0.93rem;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* ── Comment Form ───────────────────────────────────── */
+.hp-comment-form {
+  border-top: 1px solid #e8f5e9;
+  padding-top: 1rem;
+}
+
+.hp-comment-input {
+  width: 100%;
+  border: 1.5px solid #c8e6c9;
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.93rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  color: #333;
+  background: #fafffe;
+}
+.hp-comment-input:focus {
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+}
+
+/* ── Spinner ────────────────────────────────────────── */
+.hp-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  border: 4px solid #e8f5e9;
+  border-top-color: #4caf50;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Card & Featured: pointer cursor ───────────────── */
+.hp-card,
+.hp-featured-wrap,
+.hp-sidebar-item {
+  cursor: pointer;
+}
+.hp-card {
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.hp-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(56, 142, 60, 0.15);
+}
+.hp-featured-wrap {
+  transition: filter 0.15s;
+}
+.hp-featured-wrap:hover {
+  filter: brightness(1.04);
+}
+</style>
