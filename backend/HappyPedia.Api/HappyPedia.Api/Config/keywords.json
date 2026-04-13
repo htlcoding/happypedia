@@ -1,0 +1,22 @@
+{
+  "good": 1.0,
+  "positive": 1.0,
+  "success": 1.0,
+  "improvement": 0.8,
+  "innovation": 1.0,
+  "breakthrough": 1.0,
+  "hope": 0.8,
+  "record": 0.7,
+  "health": 0.8,
+  "education": 0.8,
+  "community": 0.8,
+  "science": 0.8,
+  "research": 0.8,
+  "climate": 0.7,
+  "solar": 0.7,
+  "renewable": 0.8,
+  "support": 0.7,
+  "aid": 0.7,
+  "jobs": 0.8,
+  "growth": 0.8
+}
