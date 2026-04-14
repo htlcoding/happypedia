@@ -1,36 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Dell_Leihgerät\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj": {}
+    "/Users/merajsoltani/Documents/GitHub/happypedia/backend/HappyPedia.Api/HappyPedia.Api/HappyPedia.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Dell_Leihgerät\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj": {
+    "/Users/merajsoltani/Documents/GitHub/happypedia/backend/HappyPedia.Api/HappyPedia.Api/HappyPedia.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Dell_Leihgerät\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
+        "projectUniqueName": "/Users/merajsoltani/Documents/GitHub/happypedia/backend/HappyPedia.Api/HappyPedia.Api/HappyPedia.Api.csproj",
         "projectName": "HappyPedia.Api",
-        "projectPath": "C:\\Users\\Dell_Leihgerät\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
-        "packagesPath": "C:\\Users\\Dell_Leihgerät\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Dell_Leihgerät\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\obj\\",
+        "projectPath": "/Users/merajsoltani/Documents/GitHub/happypedia/backend/HappyPedia.Api/HappyPedia.Api/HappyPedia.Api.csproj",
+        "packagesPath": "/Users/merajsoltani/.nuget/packages/",
+        "outputPath": "/Users/merajsoltani/Documents/GitHub/happypedia/backend/HappyPedia.Api/HappyPedia.Api/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Dell_Leihgerät\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/merajsoltani/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "/opt/homebrew/Cellar/dotnet/10.0.105/libexec/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -45,11 +39,10 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.200"
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.AspNetCore.OpenApi": {
@@ -102,15 +95,11 @@
               "version": "[8.0.25, 8.0.25]"
             },
             {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "name": "Microsoft.NETCore.App.Host.osx-arm64",
               "version": "[8.0.25, 8.0.25]"
             },
             {
               "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.25, 8.0.25]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
               "version": "[8.0.25, 8.0.25]"
             }
           ],
@@ -122,7 +111,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet/10.0.105/libexec/sdk/10.0.105/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
