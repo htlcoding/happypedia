@@ -2825,11 +2825,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Dell_Leihgerät\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
+      "projectUniqueName": "C:\\Users\\Dell_Leihgerät\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
       "projectName": "HappyPedia.Api",
-      "projectPath": "C:\\Users\\Dell_Leihgerät\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
+      "projectPath": "C:\\Users\\Dell_Leihgerät\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
       "packagesPath": "C:\\Users\\Dell_Leihgerät\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Dell_Leihgerät\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\obj\\",
+      "outputPath": "C:\\Users\\Dell_Leihgerät\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

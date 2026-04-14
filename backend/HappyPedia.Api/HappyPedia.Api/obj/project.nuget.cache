@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "6nV2KOS4QK4=",
+  "dgSpecHash": "DoBfRdJKep8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Dell_Leihgerät\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
+  "projectFilePath": "C:\\Users\\Dell_Leihgerät\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Dell_Leihgerät\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\Dell_Leihgerät\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.8\\microsoft.aspnetcore.openapi.8.0.8.nupkg.sha512",

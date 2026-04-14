@@ -1,60 +1,60 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\",
+  "WorkspaceRootPath": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\controllers\\articlescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\controllers\\articlescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\controllers\\articlescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\services\\rssimportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\services\\rssimportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\services\\rssimportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\services\\llmscoringservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\services\\llmscoringservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\services\\llmscoringservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\models\\article.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\models\\article.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\models\\article.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\models\\bulkrssfeedrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\models\\bulkrssfeedrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\models\\bulkrssfeedrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\models\\rssfeed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\models\\rssfeed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\models\\rssfeed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\controllers\\rssfeedscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\controllers\\rssfeedscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\controllers\\rssfeedscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\happypedia.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\happypedia.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\happypedia.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\config\\keywords.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\config\\keywords.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\config\\keywords.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\services\\keywordservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\services\\keywordservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\services\\keywordservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\source\\repos\\happypedia.api\\happypedia.api\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|c:\\users\\dell_leihger\u00E4t\\documents\\github\\happypedia\\backend\\happypedia.api\\happypedia.api\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF3FF30F-4CE9-B856-7337-446BE5FF9A7E}|HappyPedia.Api\\HappyPedia.Api.csproj|solutionrelative:happypedia.api\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -65,158 +65,148 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Microsoft.Common.CurrentVersion.targets",
-              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "ViewState": "AgIAAMcUAAAAAAAAAAAwwBgVAABPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
-              "WhenOpened": "2026-04-13T18:18:47.04Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "BulkRssFeedRequest.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Models\\BulkRssFeedRequest.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Models\\BulkRssFeedRequest.cs",
               "RelativeDocumentMoniker": "HappyPedia.Api\\Models\\BulkRssFeedRequest.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Models\\BulkRssFeedRequest.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Models\\BulkRssFeedRequest.cs",
               "RelativeToolTip": "HappyPedia.Api\\Models\\BulkRssFeedRequest.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-13T15:44:12.115Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "LlmScoringService.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Services\\LlmScoringService.cs",
-              "RelativeDocumentMoniker": "HappyPedia.Api\\Services\\LlmScoringService.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Services\\LlmScoringService.cs",
-              "RelativeToolTip": "HappyPedia.Api\\Services\\LlmScoringService.cs",
-              "ViewState": "AgIAAGMAAAAAAAAAAAAwwHQAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-13T15:46:18.907Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\appsettings.json",
-              "RelativeDocumentMoniker": "HappyPedia.Api\\appsettings.json",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\appsettings.json",
-              "RelativeToolTip": "HappyPedia.Api\\appsettings.json",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA8AAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-04-13T15:50:12.987Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "RssImportService.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Services\\RssImportService.cs",
-              "RelativeDocumentMoniker": "HappyPedia.Api\\Services\\RssImportService.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Services\\RssImportService.cs",
-              "RelativeToolTip": "HappyPedia.Api\\Services\\RssImportService.cs",
-              "ViewState": "AgIAAHgAAAAAAAAAAAAwwIkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-13T15:46:45.744Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T15:44:12.115Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "Article.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Models\\Article.cs",
-              "RelativeDocumentMoniker": "HappyPedia.Api\\Models\\Article.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Models\\Article.cs",
-              "RelativeToolTip": "HappyPedia.Api\\Models\\Article.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAxwBEAAAABAAAAAAAAAA==",
+              "Title": "LlmScoringService.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Services\\LlmScoringService.cs",
+              "RelativeDocumentMoniker": "HappyPedia.Api\\Services\\LlmScoringService.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Services\\LlmScoringService.cs",
+              "RelativeToolTip": "HappyPedia.Api\\Services\\LlmScoringService.cs",
+              "ViewState": "AgIAAGMAAAAAAAAAAAAwwHQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-13T15:43:31.22Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T15:46:18.907Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ArticlesController.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Controllers\\ArticlesController.cs",
-              "RelativeDocumentMoniker": "HappyPedia.Api\\Controllers\\ArticlesController.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Controllers\\ArticlesController.cs",
-              "RelativeToolTip": "HappyPedia.Api\\Controllers\\ArticlesController.cs",
-              "ViewState": "AgIAAFEAAAAAAAAAAAAwwFQAAAA0AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-13T15:49:38.755Z",
-              "EditorCaption": ""
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\appsettings.json",
+              "RelativeDocumentMoniker": "HappyPedia.Api\\appsettings.json",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\appsettings.json",
+              "RelativeToolTip": "HappyPedia.Api\\appsettings.json",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-04-13T15:50:12.987Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "RssFeed.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Models\\RssFeed.cs",
-              "RelativeDocumentMoniker": "HappyPedia.Api\\Models\\RssFeed.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Models\\RssFeed.cs",
-              "RelativeToolTip": "HappyPedia.Api\\Models\\RssFeed.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "DocumentIndex": 4,
+              "Title": "RssImportService.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Services\\RssImportService.cs",
+              "RelativeDocumentMoniker": "HappyPedia.Api\\Services\\RssImportService.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Services\\RssImportService.cs",
+              "RelativeToolTip": "HappyPedia.Api\\Services\\RssImportService.cs",
+              "ViewState": "AgIAAHgAAAAAAAAAAAAwwIkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-13T15:43:48.434Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T15:46:45.744Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "RssFeedsController.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Controllers\\RssFeedsController.cs",
-              "RelativeDocumentMoniker": "HappyPedia.Api\\Controllers\\RssFeedsController.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Controllers\\RssFeedsController.cs",
-              "RelativeToolTip": "HappyPedia.Api\\Controllers\\RssFeedsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-13T15:47:50.904Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Program.cs",
               "RelativeDocumentMoniker": "HappyPedia.Api\\Program.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Program.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Program.cs",
               "RelativeToolTip": "HappyPedia.Api\\Program.cs",
-              "ViewState": "AgIAAA4AAAAAAAAAAAAYwB0AAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-13T15:50:03.136Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Microsoft.Common.CurrentVersion.targets",
+              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ViewState": "AgIAAMcUAAAAAAAAAAAwwBgVAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2026-04-13T18:18:47.04Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Article.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Models\\Article.cs",
+              "RelativeDocumentMoniker": "HappyPedia.Api\\Models\\Article.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Models\\Article.cs",
+              "RelativeToolTip": "HappyPedia.Api\\Models\\Article.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAxwBEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T15:43:31.22Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ArticlesController.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Controllers\\ArticlesController.cs",
+              "RelativeDocumentMoniker": "HappyPedia.Api\\Controllers\\ArticlesController.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Controllers\\ArticlesController.cs",
+              "RelativeToolTip": "HappyPedia.Api\\Controllers\\ArticlesController.cs",
+              "ViewState": "AgIAAFEAAAAAAAAAAAAwwFQAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T15:49:38.755Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "RssFeed.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Models\\RssFeed.cs",
+              "RelativeDocumentMoniker": "HappyPedia.Api\\Models\\RssFeed.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Models\\RssFeed.cs",
+              "RelativeToolTip": "HappyPedia.Api\\Models\\RssFeed.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T15:43:48.434Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "RssFeedsController.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Controllers\\RssFeedsController.cs",
+              "RelativeDocumentMoniker": "HappyPedia.Api\\Controllers\\RssFeedsController.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Controllers\\RssFeedsController.cs",
+              "RelativeToolTip": "HappyPedia.Api\\Controllers\\RssFeedsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T15:47:50.904Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 10,
               "Title": "HappyPedia.Api.csproj",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
               "RelativeDocumentMoniker": "HappyPedia.Api\\HappyPedia.Api.csproj",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\HappyPedia.Api.csproj",
               "RelativeToolTip": "HappyPedia.Api\\HappyPedia.Api.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-04-13T15:40:56.257Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T15:40:56.257Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 11,
               "Title": "keywords.json",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Config\\keywords.json",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Config\\keywords.json",
               "RelativeDocumentMoniker": "HappyPedia.Api\\Config\\keywords.json",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Config\\keywords.json",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Config\\keywords.json",
               "RelativeToolTip": "HappyPedia.Api\\Config\\keywords.json",
               "ViewState": "AgIAAA4AAAAAAAAAAAAIwBUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
@@ -226,9 +216,9 @@
               "$type": "Document",
               "DocumentIndex": 12,
               "Title": "KeywordService.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Services\\KeywordService.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Services\\KeywordService.cs",
               "RelativeDocumentMoniker": "HappyPedia.Api\\Services\\KeywordService.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Services\\KeywordService.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Services\\KeywordService.cs",
               "RelativeToolTip": "HappyPedia.Api\\Services\\KeywordService.cs",
               "ViewState": "AgIAABwAAAAAAAAAAAAAACkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -238,9 +228,9 @@
               "$type": "Document",
               "DocumentIndex": 13,
               "Title": "AppDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Data\\AppDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Data\\AppDbContext.cs",
               "RelativeDocumentMoniker": "HappyPedia.Api\\Data\\AppDbContext.cs",
-              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\source\\repos\\HappyPedia.Api\\HappyPedia.Api\\Data\\AppDbContext.cs",
+              "ToolTip": "C:\\Users\\Dell_Leihger\u00E4t\\Documents\\GitHub\\happypedia\\backend\\HappyPedia.Api\\HappyPedia.Api\\Data\\AppDbContext.cs",
               "RelativeToolTip": "HappyPedia.Api\\Data\\AppDbContext.cs",
               "ViewState": "AgIAAAcAAAAAAAAAAAAuwBQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
