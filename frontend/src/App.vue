@@ -2,19 +2,16 @@
 import { ref, onMounted, computed } from 'vue'
 import { fetchArticles, seedArticles } from './services/api'
 
-// ── State ──────────────────────────────────────────────
 const articles        = ref([])
 const loading         = ref(true)
 const error           = ref(null)
-const selectedArticle = ref(null)   // für Detail-Ansicht
+const selectedArticle = ref(null)
 const commentInput    = ref('')
 
-// Likes & Kommentare (lokal, bis Backend da ist)
-const likes    = ref({})   // { articleId: count }
-const liked    = ref({})   // { articleId: bool }
-const comments = ref({})   // { articleId: [{ author, text, date }] }
+const likes    = ref({})
+const liked    = ref({})
+const comments = ref({})
 
-// ── Fallback-Daten ────────────────────────────────────
 const fallbackArticles = [
   {
     id: 1,
@@ -68,7 +65,7 @@ const fallbackArticles = [
     source: 'spiegel.de',
     publishedAt: '2026-03-15T16:00:00Z',
     score: 82,
-    summary: 'Ein Team der Geschwister-Scholl-Oberschule Berlin hat beim World Robot Olympiad den ersten Platz in der Kategorie "Future Engineers" belegt – und damit alle 47 Teilnehmerländer hinter sich gelassen.',
+    summary: 'Ein Team der Geschwister-Scholl-Oberschule Berlin hat beim World Robot Olympiad den ersten Platz in der Kategorie „Future Engineers" belegt – und damit alle 47 Teilnehmerländer hinter sich gelassen.',
   },
   {
     id: 7,
@@ -77,7 +74,7 @@ const fallbackArticles = [
     source: 'golem.de',
     publishedAt: '2026-03-13T09:00:00Z',
     score: 74,
-    summary: 'Das neue Förderprogramm "CodeForAll" bietet kostenlosen Programmierunterricht für Kinder ab 6 Jahren bis hin zu Senioren – und verzeichnet bereits über 50.000 aktive Teilnehmer in Deutschland.',
+    summary: 'Das neue Förderprogramm „CodeForAll" bietet kostenlosen Programmierunterricht für Kinder ab 6 Jahren bis hin zu Senioren – und verzeichnet bereits über 50.000 aktive Teilnehmer in Deutschland.',
   },
   {
     id: 8,
@@ -90,49 +87,36 @@ const fallbackArticles = [
   },
 ]
 
-// ── API-Aufruf ────────────────────────────────────────
 onMounted(async () => {
   try {
     const data = await fetchArticles()
     articles.value = data.length > 0 ? data : fallbackArticles
   } catch (e) {
-    console.warn('Backend nicht erreichbar, nutze Fallback-Daten:', e)
-    error.value = 'Backend nicht erreichbar – zeige Platzhalter-Daten.'
+    console.warn('Backend nicht erreichbar:', e)
+    error.value = 'Backend nicht erreichbar – Platzhalter-Daten werden angezeigt.'
     articles.value = fallbackArticles
   } finally {
     loading.value = false
   }
 
-  // Lokale Like/Comment-Initialisierung
-  const initId = (list) => list.forEach(a => {
+  const init = (list) => list.forEach(a => {
     likes.value[a.id]    = likes.value[a.id]    ?? Math.floor(Math.random() * 40 + 5)
     liked.value[a.id]    = liked.value[a.id]    ?? false
     comments.value[a.id] = comments.value[a.id] ?? []
   })
-  initId(fallbackArticles)
+  init(fallbackArticles)
 })
 
-// ── Computed: Nach Score sortieren, dann aufteilen ───
-const sortedArticles = computed(() =>
-  [...articles.value].sort((a, b) => b.score - a.score)
-)
+const sortedArticles   = computed(() => [...articles.value].sort((a, b) => b.score - a.score))
+const featuredArticle  = computed(() => sortedArticles.value[0] ?? null)
+const mainArticles     = computed(() => sortedArticles.value.slice(1, 4))
+const sidebarArticles  = computed(() => sortedArticles.value.slice(0, 5))
 
-const featuredArticle = computed(() => sortedArticles.value[0] ?? null)
-const mainArticles    = computed(() => sortedArticles.value.slice(1, 4))
-const sidebarArticles = computed(() => sortedArticles.value.slice(0, 5))   // Top 5 im Sidebar
-
-// ── Like-Logik ────────────────────────────────────────
 function toggleLike(id) {
-  if (liked.value[id]) {
-    likes.value[id]--
-    liked.value[id] = false
-  } else {
-    likes.value[id]++
-    liked.value[id] = true
-  }
+  if (liked.value[id]) { likes.value[id]--; liked.value[id] = false }
+  else                 { likes.value[id]++; liked.value[id] = true  }
 }
 
-// ── Kommentar-Logik ───────────────────────────────────
 function submitComment(articleId) {
   const text = commentInput.value.trim()
   if (!text) return
@@ -145,50 +129,45 @@ function submitComment(articleId) {
   commentInput.value = ''
 }
 
-// ── Artikel öffnen / schließen ────────────────────────
 function openArticle(article) {
   selectedArticle.value = article
-  commentInput.value    = ''
+  commentInput.value = ''
   document.body.style.overflow = 'hidden'
 }
+
 function closeArticle() {
   selectedArticle.value = null
   document.body.style.overflow = ''
 }
 
-// ── Hilfsfunktionen ───────────────────────────────────
-function formatDate(isoDate) {
-  return new Date(isoDate).toLocaleDateString('de-AT', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-  })
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 function formatDateLong() {
-  return new Date().toLocaleDateString('de-AT', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  })
+  return new Date().toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-function getPlaceholderImg(source, size) {
-  const dims   = { featured: '860x420', card: '520x280', sidebar: '90x70', detail: '860x360' }
-  const colors = { featured: 'c8e6c9/388e3c', card: 'e8f5e9/4caf50', sidebar: 'dcedc8/558b2f', detail: 'c8e6c9/2e7d32' }
-  return `https://placehold.co/${dims[size]}/${colors[size]}?text=${encodeURIComponent(source)}`
-}
-
-function getTagForArticle(article) {
-  if (article.score >= 90) return 'Top Story'
-  if (article.score >= 80) return 'Empfohlen'
-  if (article.score >= 70) return 'Lesenswert'
+function scoreBadge(score) {
+  if (score >= 90) return 'Top Story'
+  if (score >= 80) return 'Empfohlen'
+  if (score >= 70) return 'Lesenswert'
   return 'Aktuell'
 }
 
+function placeholderImg(source, variant) {
+  const sizes  = { hero: '900x440', card: '540x300', thumb: '96x96', detail: '900x380' }
+  const shades = { hero: 'f0f0f0/999', card: 'f5f5f5/aaa', thumb: 'eee/bbb', detail: 'f0f0f0/888' }
+  return `https://placehold.co/${sizes[variant]}/${shades[variant]}?text=${encodeURIComponent(source)}`
+}
+
 const categories = [
-  { icon: '🌍', name: 'Welt' },
-  { icon: '🇦🇹', name: 'Österreich' },
-  { icon: '🇩🇪', name: 'Deutschland' },
-  { icon: '🇨🇭', name: 'Schweiz' },
-  { icon: '💡', name: 'Innovation' },
-  { icon: '❤️', name: 'Gesellschaft' },
+  { label: 'Welt' },
+  { label: 'Österreich' },
+  { label: 'Deutschland' },
+  { label: 'Schweiz' },
+  { label: 'Innovation' },
+  { label: 'Gesellschaft' },
 ]
 
 const seeding = ref(false)
@@ -208,624 +187,1046 @@ async function handleSeed() {
 </script>
 
 <template>
-  <div class="hp-app">
-
-    <!-- TOP BAR -->
-    <div class="hp-topbar">
-      <div class="container d-flex justify-content-between align-items-center">
-        <span>Deine Plattform für positive Nachrichten aus der gesamten Welt!</span>
-        <span>{{ formatDateLong() }}</span>
-      </div>
-    </div>
+  <div class="app">
 
     <!-- HEADER -->
-    <header class="hp-header">
-      <div class="container text-center py-3">
-        <a href="#" class="hp-brand text-decoration-none">
-          <span class="hp-brand-badge">Happy</span><span class="hp-brand-pedia">Pedia</span>
+    <header class="header">
+      <div class="header-inner">
+        <a href="#" class="logo">
+          <span class="logo-mark">H</span>
+          <span class="logo-text">HappyPedia</span>
         </a>
-        <p class="hp-brand-claim">Die Happy News Plattform</p>
+        <nav class="nav-links">
+          <a v-for="cat in categories" :key="cat.label" href="#" class="nav-link">{{ cat.label }}</a>
+        </nav>
+        <div class="header-actions">
+          <input type="text" class="search-field" placeholder="Suchen …" />
+          <a href="#" class="btn-login">Anmelden</a>
+        </div>
       </div>
     </header>
 
-    <!-- NAVBAR -->
-    <nav class="hp-navbar sticky-top">
-      <div class="container">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <div class="d-flex flex-wrap">
-            <a v-for="cat in categories" :key="cat.name" href="#" class="hp-nav-item">
-              {{ cat.icon }} {{ cat.name }}
-            </a>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <input type="text" class="hp-search" placeholder="🔍 Suchen..." />
-            <a href="#" class="btn hp-btn-sm">Anmelden</a>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <!-- LOADING STATE -->
-    <div v-if="loading" class="container py-5 text-center">
-      <div class="hp-spinner"></div>
-      <p class="mt-3 text-muted">Lade Artikel…</p>
+    <!-- LOADING -->
+    <div v-if="loading" class="loading-state">
+      <div class="spinner" />
+      <p>Artikel werden geladen …</p>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <main v-else class="container py-4">
+    <!-- CONTENT -->
+    <main v-else class="main">
 
-      <!-- Fallback-Hinweis -->
-      <div v-if="error" class="alert alert-warning d-flex justify-content-between align-items-center mb-3">
-        <span>⚠️ {{ error }}</span>
-        <button class="btn btn-sm btn-outline-success" :disabled="seeding" @click="handleSeed">
-          {{ seeding ? 'Seeding…' : '🌱 Seed Testdaten' }}
+      <!-- Error banner -->
+      <div v-if="error" class="error-banner">
+        <span>{{ error }}</span>
+        <button class="btn-seed" :disabled="seeding" @click="handleSeed">
+          {{ seeding ? 'Seeding …' : 'Seed Testdaten' }}
         </button>
       </div>
 
-      <div class="row g-4">
+      <!-- Date line -->
+      <p class="dateline">{{ formatDateLong() }}</p>
 
-        <!-- LEFT COLUMN -->
-        <div class="col-lg-8">
+      <div class="grid-layout">
 
-          <!-- FEATURED ARTICLE -->
-          <article v-if="featuredArticle" class="hp-featured mb-4">
-            <div class="hp-featured-wrap" @click="openArticle(featuredArticle)" role="button" tabindex="0"
-                 @keydown.enter="openArticle(featuredArticle)">
-              <img
-                :src="getPlaceholderImg(featuredArticle.source, 'featured')"
-                :alt="featuredArticle.title"
-                class="hp-featured-img"
-              />
-              <div class="hp-featured-overlay">
-                <span class="hp-tag hp-tag-white mb-2 d-inline-block">
-                  {{ getTagForArticle(featuredArticle) }}
-                </span>
-                <h1 class="hp-featured-title">{{ featuredArticle.title }}</h1>
-                <div class="hp-meta">
-                  <span>📰 {{ featuredArticle.source }}</span>
-                  <span class="hp-dot">·</span>
-                  <span>{{ formatDate(featuredArticle.publishedAt) }}</span>
-                  <span class="hp-dot">·</span>
-                  <span>⭐ Score: {{ featuredArticle.score }}</span>
-                  <span class="hp-dot">·</span>
-                  <span>👍 {{ likes[featuredArticle.id] }}</span>
-                </div>
+        <!-- PRIMARY COLUMN -->
+        <div class="col-primary">
+
+          <!-- FEATURED -->
+          <article v-if="featuredArticle" class="featured" @click="openArticle(featuredArticle)"
+                   role="button" tabindex="0" @keydown.enter="openArticle(featuredArticle)">
+            <img :src="placeholderImg(featuredArticle.source, 'hero')" :alt="featuredArticle.title" class="featured-img" />
+            <div class="featured-body">
+              <span class="badge">{{ scoreBadge(featuredArticle.score) }}</span>
+              <h1 class="featured-title">{{ featuredArticle.title }}</h1>
+              <p class="featured-summary">{{ featuredArticle.summary }}</p>
+              <div class="meta">
+                <span>{{ featuredArticle.source }}</span>
+                <span class="sep" />
+                <span>{{ formatDate(featuredArticle.publishedAt) }}</span>
+                <span class="sep" />
+                <span>Score {{ featuredArticle.score }}</span>
               </div>
             </div>
           </article>
 
-          <!-- SECTION HEADING -->
-          <div class="hp-section-head mb-3">
-            <h2 class="hp-section-title">Aktuelle Happy News</h2>
-          </div>
+          <!-- SECTION -->
+          <h2 class="section-title">Aktuelle Happy News</h2>
 
-          <!-- ARTICLE GRID -->
-          <div class="row g-3">
-            <div v-for="art in mainArticles" :key="art.id" class="col-sm-6 col-lg-4">
-              <article class="hp-card h-100" @click="openArticle(art)" role="button" tabindex="0"
-                       @keydown.enter="openArticle(art)">
-                <img
-                  :src="getPlaceholderImg(art.source, 'card')"
-                  :alt="art.title"
-                  class="hp-card-img"
-                />
-                <div class="hp-card-body">
-                  <div class="mb-2">
-                    <span class="hp-tag">{{ getTagForArticle(art) }}</span>
-                    <span class="hp-tag hp-tag-outline ms-1">{{ art.source }}</span>
-                  </div>
-                  <h3 class="hp-card-title">{{ art.title }}</h3>
-                  <div class="hp-meta mt-2">
-                    <span>{{ formatDate(art.publishedAt) }}</span>
-                    <span class="hp-dot">·</span>
-                    <span>⭐ {{ art.score }}</span>
-                    <span class="hp-dot">·</span>
-                    <span>👍 {{ likes[art.id] ?? 0 }}</span>
-                  </div>
+          <!-- CARDS -->
+          <div class="card-grid">
+            <article v-for="art in mainArticles" :key="art.id" class="card"
+                     @click="openArticle(art)" role="button" tabindex="0" @keydown.enter="openArticle(art)">
+              <img :src="placeholderImg(art.source, 'card')" :alt="art.title" class="card-img" />
+              <div class="card-body">
+                <div class="card-badges">
+                  <span class="badge">{{ scoreBadge(art.score) }}</span>
+                  <span class="badge badge-outline">{{ art.source }}</span>
                 </div>
-              </article>
-            </div>
+                <h3 class="card-title">{{ art.title }}</h3>
+                <div class="meta">
+                  <span>{{ formatDate(art.publishedAt) }}</span>
+                  <span class="sep" />
+                  <span>Score {{ art.score }}</span>
+                </div>
+              </div>
+            </article>
           </div>
 
-          <div class="text-center mt-4">
-            <a href="#" class="btn hp-btn-outline px-5">Weitere Artikel laden</a>
+          <div class="load-more-wrap">
+            <a href="#" class="btn-load-more">Weitere Artikel</a>
           </div>
         </div>
 
         <!-- SIDEBAR -->
-        <aside class="col-lg-4">
+        <aside class="col-sidebar">
 
-          <!-- NEWSLETTER -->
-          <div class="hp-widget hp-widget-green mb-4">
-            <h5 class="hp-widget-title">💌 Newsletter</h5>
-            <p class="hp-widget-text">Wöchentlich die besten positiven News direkt ins Postfach.</p>
-            <input type="email" class="form-control hp-input mb-2" placeholder="deine@email.de" />
-            <button class="btn hp-btn-white w-100">Kostenlos anmelden</button>
-          </div>
-
-          <!-- KATEGORIEN -->
-          <div class="hp-widget mb-4">
-            <h5 class="hp-widget-title hp-widget-title-dark">📂 Kategorien</h5>
-            <div class="d-flex flex-wrap gap-2 mt-2">
-              <a v-for="cat in categories" :key="cat.name" href="#" class="hp-tag hp-tag-link">
-                {{ cat.icon }} {{ cat.name }}
-              </a>
+          <!-- Kategorien -->
+          <div class="widget">
+            <h4 class="widget-title">Kategorien</h4>
+            <div class="tag-cloud">
+              <a v-for="cat in categories" :key="cat.label" href="#" class="tag">{{ cat.label }}</a>
             </div>
           </div>
 
-          <!-- TOP SCORED (korrekt nach Score sortiert) -->
-          <div class="hp-widget mb-4">
-            <h5 class="hp-widget-title hp-widget-title-dark">🔥 Höchster Score</h5>
-            <div class="hp-sidebar-list">
-              <div
-                v-for="(art, i) in sidebarArticles"
-                :key="art.id"
-                class="hp-sidebar-item"
-                @click="openArticle(art)"
-                role="button"
-                tabindex="0"
-                @keydown.enter="openArticle(art)"
-              >
-                <span class="hp-sidebar-num">{{ i + 1 }}</span>
-                <img
-                  :src="getPlaceholderImg(art.source, 'sidebar')"
-                  :alt="art.title"
-                  class="hp-sidebar-img"
-                />
-                <div class="hp-sidebar-info">
-                  <span class="hp-tag hp-tag-xs">⭐ {{ art.score }}</span>
-                  <p class="hp-sidebar-title">{{ art.title }}</p>
-                  <small class="hp-sidebar-date">{{ art.source }} · {{ formatDate(art.publishedAt) }}</small>
+          <!-- Top Scored -->
+          <div class="widget">
+            <h4 class="widget-title">Höchster Score</h4>
+            <ol class="rank-list">
+              <li v-for="(art, i) in sidebarArticles" :key="art.id" class="rank-item"
+                  @click="openArticle(art)" role="button" tabindex="0" @keydown.enter="openArticle(art)">
+                <span class="rank-num">{{ i + 1 }}</span>
+                <div class="rank-info">
+                  <p class="rank-title">{{ art.title }}</p>
+                  <span class="rank-meta">{{ art.source }} · Score {{ art.score }}</span>
                 </div>
-              </div>
-            </div>
+              </li>
+            </ol>
           </div>
-
         </aside>
       </div>
     </main>
 
     <!-- FOOTER -->
-    <footer class="hp-footer">
-      <div class="container">
-        <div class="row g-4 py-5">
-          <div class="col-lg-4">
-            <a href="#" class="hp-brand text-decoration-none">
-              <span class="hp-brand-badge">Happy</span><span class="hp-brand-pedia" style="color:#a5d6a7">Pedia</span>
-            </a>
-            <p class="hp-footer-text mt-2">Positive Nachrichten aus dem DACH-Raum und der Welt.</p>
-          </div>
-          <div class="col-6 col-lg-2">
-            <h6 class="hp-footer-heading">Regionen</h6>
-            <ul class="list-unstyled hp-footer-links">
-              <li><a href="#">Österreich</a></li>
-              <li><a href="#">Deutschland</a></li>
-              <li><a href="#">Schweiz</a></li>
-              <li><a href="#">International</a></li>
-            </ul>
-          </div>
-          <div class="col-6 col-lg-2">
-            <h6 class="hp-footer-heading">Über uns</h6>
-            <ul class="list-unstyled hp-footer-links">
-              <li><a href="#">Team</a></li>
-              <li><a href="#">Kontakt</a></li>
-              <li><a href="#">Quellen</a></li>
-            </ul>
-          </div>
-          <div class="col-6 col-lg-2">
-            <h6 class="hp-footer-heading">Rechtliches</h6>
-            <ul class="list-unstyled hp-footer-links">
-              <li><a href="#">Impressum</a></li>
-              <li><a href="#">Datenschutz</a></li>
-              <li><a href="#">AGB</a></li>
-            </ul>
-          </div>
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a href="#" class="logo">
+            <span class="logo-mark">H</span>
+            <span class="logo-text" style="color: var(--c-text-tertiary)">HappyPedia</span>
+          </a>
+          <p class="footer-desc">Positive Nachrichten aus dem DACH-Raum und der Welt.</p>
         </div>
-        <div class="hp-footer-bottom d-flex justify-content-between align-items-center py-3">
-          <small class="hp-footer-text">© 2026 HappyPedia. Alle Rechte vorbehalten.</small>
-          <div class="d-flex gap-3">
-            <a href="#" class="hp-social">📘</a>
-            <a href="#" class="hp-social">📸</a>
-            <a href="#" class="hp-social">🐦</a>
-          </div>
+        <div class="footer-col">
+          <h6>Regionen</h6>
+          <a href="#">Österreich</a>
+          <a href="#">Deutschland</a>
+          <a href="#">Schweiz</a>
+          <a href="#">International</a>
         </div>
+        <div class="footer-col">
+          <h6>Über uns</h6>
+          <a href="#">Team</a>
+          <a href="#">Kontakt</a>
+          <a href="#">Quellen</a>
+        </div>
+        <div class="footer-col">
+          <h6>Rechtliches</h6>
+          <a href="#">Impressum</a>
+          <a href="#">Datenschutz</a>
+          <a href="#">AGB</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <small>© 2026 HappyPedia</small>
       </div>
     </footer>
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- ARTIKEL-DETAIL MODAL                           -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <Transition name="modal-fade">
-      <div v-if="selectedArticle" class="hp-modal-backdrop" @click.self="closeArticle">
-        <div class="hp-modal" role="dialog" aria-modal="true">
+    <!-- DETAIL MODAL -->
+    <Transition name="hp-fade">
+      <div v-if="selectedArticle" class="hp-overlay" @click.self="closeArticle">
+        <div class="hp-dialog" role="dialog" aria-modal="true" @click.stop>
 
-          <!-- Modal Header -->
-          <div class="hp-modal-header">
-            <div class="d-flex align-items-center gap-2">
-              <span class="hp-tag">{{ getTagForArticle(selectedArticle) }}</span>
-              <span class="hp-tag hp-tag-outline">{{ selectedArticle.source }}</span>
-            </div>
-            <button class="hp-modal-close" @click="closeArticle" aria-label="Schließen">✕</button>
+        <div class="hp-dialog-head">
+          <div class="hp-dialog-head-badges">
+            <span class="badge">{{ scoreBadge(selectedArticle.score) }}</span>
+            <span class="badge badge-outline">{{ selectedArticle.source }}</span>
           </div>
+          <button class="hp-dialog-close" @click="closeArticle" aria-label="Schließen">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
 
-          <!-- Modal Body (scrollable) -->
-          <div class="hp-modal-body">
+        <div class="hp-dialog-scroll">
+          <img :src="placeholderImg(selectedArticle.source, 'detail')" :alt="selectedArticle.title" class="hp-dialog-img" />
 
-            <!-- Hero Image -->
-            <img
-              :src="getPlaceholderImg(selectedArticle.source, 'detail')"
-              :alt="selectedArticle.title"
-              class="hp-modal-img"
-            />
+          <div class="hp-dialog-content">
+            <h2 class="hp-dialog-title">{{ selectedArticle.title }}</h2>
+            <div class="meta hp-dialog-meta">
+              <span>{{ selectedArticle.source }}</span>
+              <span class="sep" />
+              <span>{{ formatDate(selectedArticle.publishedAt) }}</span>
+              <span class="sep" />
+              <span>Score {{ selectedArticle.score }}</span>
+            </div>
 
-            <!-- Title & Meta -->
-            <div class="hp-modal-content">
-              <h2 class="hp-modal-title">{{ selectedArticle.title }}</h2>
-              <div class="hp-meta mb-3">
-                <span>📰 {{ selectedArticle.source }}</span>
-                <span class="hp-dot">·</span>
-                <span>{{ formatDate(selectedArticle.publishedAt) }}</span>
-                <span class="hp-dot">·</span>
-                <span>⭐ Score: {{ selectedArticle.score }}</span>
-              </div>
+            <p class="hp-dialog-summary">{{ selectedArticle.summary ?? 'Kein Kurztext verfügbar.' }}</p>
 
-              <!-- Summary / Artikel-Text -->
-              <p class="hp-modal-summary">
-                {{ selectedArticle.summary ?? 'Kein Kurztext verfügbar.' }}
-              </p>
+            <a :href="selectedArticle.url" target="_blank" rel="noopener" class="btn-original">
+              Originalartikel öffnen
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2h7v7M12 2L2 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
 
-              <!-- Originallink -->
-              <a :href="selectedArticle.url" target="_blank" rel="noopener" class="btn hp-btn-outline mb-4">
-                🔗 Originalartikel öffnen
-              </a>
+            <!-- Like -->
+            <div class="like-row">
+              <button class="like-btn" :class="{ active: liked[selectedArticle.id] }" @click="toggleLike(selectedArticle.id)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 11v10M3 13v6a2 2 0 002 2h11.6a2 2 0 002-1.6l1.3-8A2 2 0 0017.9 9H14V5a3 3 0 00-3-3l-1 1-3 6v2" :fill="liked[selectedArticle.id] ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>{{ likes[selectedArticle.id] ?? 0 }}</span>
+              </button>
+              <span class="like-hint">{{ liked[selectedArticle.id] ? 'Danke für dein Like!' : 'Hilf anderen, gute Nachrichten zu finden.' }}</span>
+            </div>
 
-              <!-- ─── LIKE / UPVOTE ─────────────────── -->
-              <div class="hp-like-section">
-                <button
-                  class="hp-like-btn"
-                  :class="{ 'hp-like-btn--active': liked[selectedArticle.id] }"
-                  @click="toggleLike(selectedArticle.id)"
-                >
-                  <span class="hp-like-icon">{{ liked[selectedArticle.id] ? '👍' : '👍' }}</span>
-                  <span class="hp-like-count">{{ likes[selectedArticle.id] ?? 0 }}</span>
-                  <span class="hp-like-label">{{ liked[selectedArticle.id] ? 'Geliked!' : 'Gefällt mir' }}</span>
-                </button>
-                <span class="hp-like-hint">Hilf anderen, gute Nachrichten zu finden.</span>
-              </div>
+            <!-- Kommentare -->
+            <div class="comments">
+              <h4 class="comments-title">
+                Kommentare
+                <span class="comments-count">{{ (comments[selectedArticle.id] ?? []).length }}</span>
+              </h4>
 
-              <!-- ─── KOMMENTARE ────────────────────── -->
-              <div class="hp-comments-section">
-                <h4 class="hp-comments-heading">
-                  💬 Kommentare
-                  <span class="hp-comments-count">({{ (comments[selectedArticle.id] ?? []).length }})</span>
-                </h4>
-
-                <!-- Kommentar-Liste -->
-                <div class="hp-comments-list">
-                  <div
-                    v-if="(comments[selectedArticle.id] ?? []).length === 0"
-                    class="hp-comments-empty"
-                  >
-                    Noch keine Kommentare. Schreib den ersten! 🌱
-                  </div>
-                  <div
-                    v-for="(c, idx) in (comments[selectedArticle.id] ?? [])"
-                    :key="idx"
-                    class="hp-comment"
-                  >
-                    <div class="hp-comment-avatar">{{ c.author[0] }}</div>
-                    <div class="hp-comment-body">
-                      <div class="hp-comment-meta">
-                        <strong>{{ c.author }}</strong>
-                        <span class="hp-comment-date">{{ c.date }}</span>
-                      </div>
-                      <p class="hp-comment-text">{{ c.text }}</p>
+              <div class="comments-list">
+                <p v-if="(comments[selectedArticle.id] ?? []).length === 0" class="comments-empty">
+                  Noch keine Kommentare – schreib den ersten.
+                </p>
+                <div v-for="(c, idx) in (comments[selectedArticle.id] ?? [])" :key="idx" class="comment">
+                  <div class="comment-avatar">{{ c.author[0] }}</div>
+                  <div class="comment-body">
+                    <div class="comment-meta">
+                      <strong>{{ c.author }}</strong>
+                      <span>{{ c.date }}</span>
                     </div>
-                  </div>
-                </div>
-
-                <!-- Kommentar schreiben -->
-                <div class="hp-comment-form">
-                  <textarea
-                    v-model="commentInput"
-                    class="hp-comment-input"
-                    placeholder="Dein Kommentar…"
-                    rows="3"
-                    @keydown.ctrl.enter="submitComment(selectedArticle.id)"
-                  ></textarea>
-                  <div class="d-flex justify-content-between align-items-center mt-2">
-                    <small class="text-muted">Ctrl + Enter zum Senden</small>
-                    <button
-                      class="btn hp-btn-sm"
-                      :disabled="!commentInput.trim()"
-                      @click="submitComment(selectedArticle.id)"
-                    >
-                      Kommentar senden ✉️
-                    </button>
+                    <p>{{ c.text }}</p>
                   </div>
                 </div>
               </div>
 
-            </div><!-- /hp-modal-content -->
-          </div><!-- /hp-modal-body -->
-        </div><!-- /hp-modal -->
-      </div><!-- /backdrop -->
+              <div class="comment-form">
+                <textarea
+                  v-model="commentInput"
+                  class="comment-input"
+                  placeholder="Dein Kommentar …"
+                  rows="2"
+                  @keydown.ctrl.enter="submitComment(selectedArticle.id)"
+                  @keydown.meta.enter="submitComment(selectedArticle.id)"
+                ></textarea>
+                <button class="btn-send" :disabled="!commentInput.trim()" @click="submitComment(selectedArticle.id)">
+                  Senden
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
     </Transition>
-
   </div>
 </template>
 
 <style scoped>
-/* ── Modal Transitions ──────────────────────────────── */
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.25s ease;
-}
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
-.modal-fade-enter-active .hp-modal,
-.modal-fade-leave-active .hp-modal {
-  transition: transform 0.25s ease;
-}
-.modal-fade-enter-from .hp-modal {
-  transform: translateY(32px);
+/* ─── RESET ──────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+.app {
+  --c-bg:             #ffffff;
+  --c-surface:        #f5f5f7;
+  --c-surface-hover:  #ececee;
+  --c-border:         #d2d2d7;
+  --c-border-light:   #e8e8ed;
+  --c-text-primary:   #1d1d1f;
+  --c-text-secondary: #6e6e73;
+  --c-text-tertiary:  #86868b;
+  --c-accent:         #2d8a3e;
+  --c-accent-light:   #e8f5e9;
+  --c-accent-hover:   #24712f;
+  --c-dark:           #1d1d1f;
+  --radius-s:         8px;
+  --radius-m:         12px;
+  --radius-l:         20px;
+  --shadow-card:      0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+  --shadow-modal:     0 24px 80px rgba(0,0,0,.18);
+  --font-display:     'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --font-body:        'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --transition:       .2s cubic-bezier(.4,0,.2,1);
+
+  font-family: var(--font-body);
+  color: var(--c-text-primary);
+  background: var(--c-bg);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-/* ── Backdrop ───────────────────────────────────────── */
-.hp-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 1050;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  overflow-y: auto;
-  padding: 2rem 1rem;
+/* ─── HEADER ─────────────────────────────────────────── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--c-border-light);
 }
 
-/* ── Modal Box ──────────────────────────────────────── */
-.hp-modal {
-  background: #fff;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 720px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-  position: relative;
-}
-
-.hp-modal-header {
+.header-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 52px;
   display: flex;
   align-items: center;
+  gap: 32px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  background: var(--c-accent);
+  color: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--c-text-primary);
+  letter-spacing: -0.3px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-link {
+  font-size: 13px;
+  color: var(--c-text-secondary);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-s);
+  transition: background var(--transition), color var(--transition);
+}
+.nav-link:hover {
+  background: var(--c-surface);
+  color: var(--c-text-primary);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.search-field {
+  width: 180px;
+  height: 32px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-s);
+  padding: 0 12px;
+  font-size: 13px;
+  background: var(--c-surface);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.search-field:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(45,138,62,.12);
+}
+
+.btn-login {
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--c-accent);
+  padding: 6px 16px;
+  border-radius: var(--radius-s);
+  text-decoration: none;
+  transition: background var(--transition);
+}
+.btn-login:hover { background: var(--c-accent-hover); }
+
+/* ─── LOADING ────────────────────────────────────────── */
+.loading-state {
+  text-align: center;
+  padding: 120px 24px;
+  color: var(--c-text-tertiary);
+  font-size: 14px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 16px;
+  border: 3px solid var(--c-border-light);
+  border-top-color: var(--c-accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg) } }
+
+/* ─── MAIN ───────────────────────────────────────────── */
+.main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.error-banner {
+  display: flex;
   justify-content: space-between;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #e8f5e9;
-  background: #f9fbe7;
+  align-items: center;
+  background: #fffbe6;
+  border: 1px solid #f5d442;
+  border-radius: var(--radius-m);
+  padding: 12px 20px;
+  margin-bottom: 24px;
+  font-size: 13px;
 }
 
-.hp-modal-close {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
+.btn-seed {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-s);
+  background: #fff;
   cursor: pointer;
-  color: #555;
-  line-height: 1;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  transition: background 0.15s;
+  transition: background var(--transition);
 }
-.hp-modal-close:hover {
-  background: #e8f5e9;
+.btn-seed:hover { background: var(--c-surface); }
+.btn-seed:disabled { opacity: .5; cursor: default; }
+
+.dateline {
+  font-size: 13px;
+  color: var(--c-text-tertiary);
+  margin-bottom: 28px;
+  letter-spacing: .01em;
 }
 
-.hp-modal-body {
-  max-height: calc(100vh - 8rem);
-  overflow-y: auto;
+/* ─── GRID LAYOUT ────────────────────────────────────── */
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 48px;
 }
 
-.hp-modal-img {
+@media (max-width: 960px) {
+  .grid-layout { grid-template-columns: 1fr; gap: 40px; }
+  .nav-links { display: none; }
+  .search-field { width: 140px; }
+}
+
+/* ─── FEATURED ───────────────────────────────────────── */
+.featured {
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  background: var(--c-surface);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  margin-bottom: 40px;
+}
+.featured:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.featured-img {
   width: 100%;
-  height: 240px;
+  height: 360px;
   object-fit: cover;
   display: block;
 }
 
-.hp-modal-content {
-  padding: 1.5rem;
+.featured-body {
+  padding: 28px 32px 32px;
 }
 
-.hp-modal-title {
-  font-size: 1.5rem;
+.featured-title {
+  font-family: var(--font-display);
+  font-size: 28px;
   font-weight: 700;
-  color: #1b5e20;
-  line-height: 1.3;
-  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin: 12px 0 10px;
+  color: var(--c-text-primary);
 }
 
-.hp-modal-summary {
-  font-size: 1rem;
+.featured-summary {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--c-text-secondary);
+  margin-bottom: 16px;
+}
+
+/* ─── BADGE ──────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--c-accent-light);
+  color: var(--c-accent);
+}
+.badge-outline {
+  background: transparent;
+  border: 1px solid var(--c-border);
+  color: var(--c-text-secondary);
+}
+
+/* ─── META ───────────────────────────────────────────── */
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--c-text-tertiary);
+}
+
+.sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--c-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* ─── SECTION TITLE ──────────────────────────────────── */
+.section-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin-bottom: 20px;
+}
+
+/* ─── CARDS ──────────────────────────────────────────── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 720px) {
+  .card-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border-light);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+}
+
+.card-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.card-body {
+  padding: 16px 18px 20px;
+}
+
+.card-badges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.1px;
+  color: var(--c-text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.load-more-wrap {
+  text-align: center;
+  margin-top: 36px;
+}
+
+.btn-load-more {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--c-accent);
+  border: 1px solid var(--c-accent);
+  padding: 10px 36px;
+  border-radius: var(--radius-s);
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition);
+}
+.btn-load-more:hover {
+  background: var(--c-accent);
+  color: #fff;
+}
+
+/* ─── SIDEBAR ────────────────────────────────────────── */
+.widget {
+  padding: 24px;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border-light);
+  border-radius: var(--radius-m);
+  margin-bottom: 20px;
+}
+
+.widget-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: -0.1px;
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--c-text-secondary);
+  transition: background var(--transition), color var(--transition);
+}
+.tag:hover {
+  background: var(--c-accent-light);
+  color: var(--c-accent);
+  border-color: var(--c-accent-light);
+}
+
+/* ─── RANK LIST ──────────────────────────────────────── */
+.rank-list {
+  list-style: none;
+}
+
+.rank-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--c-border-light);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.rank-item:last-child { border-bottom: none; }
+.rank-item:hover { background: var(--c-surface); margin: 0 -12px; padding-left: 12px; padding-right: 12px; border-radius: var(--radius-s); }
+
+.rank-num {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--c-border);
+  min-width: 24px;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.rank-info { flex: 1; }
+
+.rank-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--c-text-primary);
+  margin-bottom: 4px;
+}
+
+.rank-meta {
+  font-size: 11px;
+  color: var(--c-text-tertiary);
+}
+
+/* ─── FOOTER ─────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--c-border-light);
+  background: var(--c-surface);
+}
+
+.footer-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 24px 32px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 40px;
+}
+
+@media (max-width: 720px) {
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 24px; }
+}
+
+.footer-desc {
+  font-size: 13px;
+  color: var(--c-text-tertiary);
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.footer-col h6 {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--c-text-secondary);
+  margin-bottom: 14px;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: var(--c-text-tertiary);
+  text-decoration: none;
+  padding: 3px 0;
+  transition: color var(--transition);
+}
+.footer-col a:hover { color: var(--c-text-primary); }
+
+.footer-bottom {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  border-top: 1px solid var(--c-border-light);
+  color: var(--c-text-tertiary);
+  font-size: 12px;
+}
+
+/* ─── MODAL ──────────────────────────────────────────── */
+
+.hp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 48px 16px;
+}
+
+.hp-dialog {
+  background: #fff;
+  border-radius: var(--radius-l);
+  width: 100%;
+  max-width: 680px;
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+}
+
+.hp-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--c-border-light);
+}
+
+.hp-dialog-head-badges { display: flex; gap: 6px; }
+
+.hp-dialog-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--c-surface);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--c-text-secondary);
+  transition: background var(--transition);
+}
+.hp-dialog-close:hover { background: var(--c-surface-hover); }
+
+.hp-dialog-scroll {
+  max-height: calc(100vh - 10rem);
+  overflow-y: auto;
+}
+
+.hp-dialog-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.hp-dialog-content { padding: 28px; }
+
+.hp-dialog-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  line-height: 1.25;
+  color: var(--c-text-primary);
+  margin-bottom: 8px;
+}
+
+.hp-dialog-meta { margin-bottom: 16px; }
+
+.hp-dialog-summary {
+  font-size: 15px;
   line-height: 1.7;
-  color: #444;
-  margin-bottom: 1.25rem;
+  color: var(--c-text-secondary);
+  margin-bottom: 20px;
 }
 
-/* ── Like Button ────────────────────────────────────── */
-.hp-like-section {
-  display: flex;
+.btn-original {
+  display: inline-flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: #f1f8e9;
-  border-radius: 12px;
-  margin-bottom: 2rem;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--c-accent);
+  border: 1px solid var(--c-accent);
+  padding: 8px 20px;
+  border-radius: var(--radius-s);
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition);
+  margin-bottom: 28px;
+}
+.btn-original:hover {
+  background: var(--c-accent);
+  color: #fff;
 }
 
-.hp-like-btn {
+/* ─── LIKE ROW ───────────────────────────────────────── */
+.like-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  border: 2px solid #a5d6a7;
+  gap: 14px;
+  padding: 16px 20px;
+  background: var(--c-surface);
+  border-radius: var(--radius-m);
+  margin-bottom: 28px;
+}
+
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: 1.5px solid var(--c-border);
   background: #fff;
   border-radius: 999px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 14px;
   font-weight: 600;
-  color: #388e3c;
-  transition: all 0.2s ease;
-  user-select: none;
+  color: var(--c-text-secondary);
+  transition: all var(--transition);
 }
-.hp-like-btn:hover {
-  background: #e8f5e9;
-  border-color: #66bb6a;
-  transform: scale(1.04);
+.like-btn:hover {
+  border-color: var(--c-accent);
+  color: var(--c-accent);
 }
-.hp-like-btn--active {
-  background: #2e7d32;
-  border-color: #2e7d32;
+.like-btn.active {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
   color: #fff;
 }
-.hp-like-btn--active:hover {
-  background: #388e3c;
+.like-btn.active:hover {
+  background: var(--c-accent-hover);
+  border-color: var(--c-accent-hover);
+  color: #fff;
 }
 
-.hp-like-icon  { font-size: 1.1rem; }
-.hp-like-count { font-size: 1.1rem; }
-.hp-like-label { font-size: 0.85rem; }
-.hp-like-hint  { font-size: 0.8rem; color: #666; }
-
-/* ── Comments ───────────────────────────────────────── */
-.hp-comments-section {
-  border-top: 2px solid #e8f5e9;
-  padding-top: 1.5rem;
+.like-hint {
+  font-size: 12px;
+  color: var(--c-text-tertiary);
 }
 
-.hp-comments-heading {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1b5e20;
-  margin-bottom: 1rem;
+/* ─── COMMENTS ───────────────────────────────────────── */
+.comments {
+  background: var(--c-surface);
+  border-radius: var(--radius-l);
+  padding: 24px;
+  margin-top: 8px;
 }
-.hp-comments-count {
+
+.comments-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.comments-count {
   font-weight: 400;
-  color: #888;
-  font-size: 0.95rem;
+  color: var(--c-text-tertiary);
+  font-size: 14px;
 }
 
-.hp-comments-empty {
+.comments-empty {
   text-align: center;
-  color: #999;
-  padding: 1.5rem;
-  font-size: 0.95rem;
+  color: var(--c-text-tertiary);
+  font-size: 13px;
+  padding: 20px;
 }
 
-.hp-comments-list {
+.comments-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
-.hp-comment {
+.comment {
   display: flex;
-  gap: 0.75rem;
+  gap: 10px;
 }
 
-.hp-comment-avatar {
-  width: 36px;
-  height: 36px;
+.comment-avatar {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #a5d6a7;
-  color: #1b5e20;
-  font-weight: 700;
-  font-size: 1rem;
+  background: #fff;
+  color: var(--c-text-secondary);
+  font-weight: 600;
+  font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.hp-comment-body {
-  background: #f9fbe7;
-  border-radius: 10px;
-  padding: 0.6rem 0.9rem;
+.comment-body {
+  background: #fff;
+  border-radius: var(--radius-m);
+  padding: 10px 14px;
   flex: 1;
 }
 
-.hp-comment-meta {
+.comment-meta {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.3rem;
-  font-size: 0.85rem;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--c-text-tertiary);
 }
-.hp-comment-date {
-  color: #999;
-  font-weight: 400;
-}
-.hp-comment-text {
+.comment-meta strong { color: var(--c-text-primary); }
+
+.comment-body p {
   margin: 0;
-  font-size: 0.93rem;
-  color: #333;
+  font-size: 13px;
+  color: var(--c-text-primary);
   line-height: 1.5;
 }
 
-/* ── Comment Form ───────────────────────────────────── */
-.hp-comment-form {
-  border-top: 1px solid #e8f5e9;
-  padding-top: 1rem;
+.comment-form {
+  border-top: 1px solid var(--c-border-light);
+  padding-top: 16px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
 }
 
-.hp-comment-input {
-  width: 100%;
-  border: 1.5px solid #c8e6c9;
-  border-radius: 10px;
-  padding: 0.65rem 0.9rem;
-  font-size: 0.93rem;
-  resize: vertical;
+.comment-input {
+  flex: 1;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-m);
+  padding: 10px 14px;
+  font-size: 13px;
+  resize: none;
   outline: none;
-  transition: border-color 0.15s;
   font-family: inherit;
-  color: #333;
-  background: #fafffe;
+  color: var(--c-text-primary);
+  background: #fff;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
-.hp-comment-input:focus {
-  border-color: #4caf50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+.comment-input:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(45,138,62,.1);
 }
 
-/* ── Spinner ────────────────────────────────────────── */
-.hp-spinner {
-  width: 40px;
-  height: 40px;
-  margin: 0 auto;
-  border: 4px solid #e8f5e9;
-  border-top-color: #4caf50;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Card & Featured: pointer cursor ───────────────── */
-.hp-card,
-.hp-featured-wrap,
-.hp-sidebar-item {
+.btn-send {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--c-accent);
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-m);
   cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  white-space: nowrap;
 }
-.hp-card {
-  transition: transform 0.15s, box-shadow 0.15s;
+.btn-send:hover { background: var(--c-accent-hover); transform: scale(1.02); }
+.btn-send:disabled { opacity: .35; cursor: default; transform: none; }
+</style>
+
+<style>
+.hp-fade-enter-active {
+  transition: opacity .25s ease;
 }
-.hp-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(56, 142, 60, 0.15);
+.hp-fade-leave-active {
+  transition: opacity .2s ease;
 }
-.hp-featured-wrap {
-  transition: filter 0.15s;
+.hp-fade-enter-active .hp-dialog {
+  transition: transform .3s cubic-bezier(.16,1,.3,1), opacity .25s ease;
 }
-.hp-featured-wrap:hover {
-  filter: brightness(1.04);
+.hp-fade-leave-active .hp-dialog {
+  transition: transform .2s ease, opacity .2s ease;
+}
+.hp-fade-enter-from {
+  opacity: 0;
+}
+.hp-fade-enter-from .hp-dialog {
+  opacity: 0;
+  transform: translateY(24px) scale(.97);
+}
+.hp-fade-leave-to {
+  opacity: 0;
+}
+.hp-fade-leave-to .hp-dialog {
+  opacity: 0;
+  transform: translateY(12px) scale(.98);
 }
 </style>
