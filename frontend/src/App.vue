@@ -1,16 +1,25 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { fetchArticles, seedArticles } from './services/api'
+import {
+  fetchArticles,
+  fetchArticlesFromFeeds,
+  likeArticle,
+  dislikeArticle,
+  deleteArticle
+} from './services/api'
 
-const articles        = ref([])
-const loading         = ref(true)
-const error           = ref(null)
+const articles = ref([])
+const loading = ref(true)
+const error = ref(null)
 const selectedArticle = ref(null)
-const commentInput    = ref('')
+const commentInput = ref('')
 
-const likes    = ref({})
-const liked    = ref({})
+const likes = ref({})
+const liked = ref({})
 const comments = ref({})
+const imageErrors = ref({})
+
+const visibleCount = ref(9)
 
 const fallbackArticles = [
   {
@@ -21,6 +30,9 @@ const fallbackArticles = [
     publishedAt: '2026-03-16T10:00:00Z',
     score: 92,
     summary: 'Ein junges Wiener Startup hat eine App entwickelt, die Supermärkte und Restaurants dabei hilft, überschüssige Lebensmittel an Bedürftige weiterzugeben – und damit Tonnen von Lebensmittelabfällen zu vermeiden.',
+    imageUrl: null,
+    upvotes: 0,
+    downvotes: 0
   },
   {
     id: 2,
@@ -30,6 +42,9 @@ const fallbackArticles = [
     publishedAt: '2026-03-15T08:30:00Z',
     score: 88,
     summary: 'Eine großangelegte Studie mit über 10.000 Teilnehmern belegt: Wer regelmäßig ehrenamtlich tätig ist, berichtet signifikant seltener von Burnout, Einsamkeit und Depressionen.',
+    imageUrl: null,
+    upvotes: 0,
+    downvotes: 0
   },
   {
     id: 3,
@@ -39,82 +54,94 @@ const fallbackArticles = [
     publishedAt: '2026-03-16T14:00:00Z',
     score: 95,
     summary: 'Deutschland hat einen neuen Rekord bei erneuerbaren Energien aufgestellt: An einem sonnigen Frühlingstag deckten Solar-, Wind- und Wasserkraft gemeinsam 60 % des gesamten Strombedarfs.',
-  },
-  {
-    id: 4,
-    title: 'Schweizer Forscher finden neuen Ansatz gegen Antibiotikaresistenz',
-    url: 'https://example.com/antibiotika-forschung',
-    source: 'nzz.ch',
-    publishedAt: '2026-03-14T12:00:00Z',
-    score: 85,
-    summary: 'Forschende der ETH Zürich haben einen molekularen Mechanismus entdeckt, der resistente Bakterien wieder für bestehende Antibiotika empfänglich machen könnte – ein Durchbruch für die Medizin.',
-  },
-  {
-    id: 5,
-    title: 'Community Gardens in Graz: Nachbarschaft wächst zusammen',
-    url: 'https://example.com/community-gardens-graz',
-    source: 'kleinezeitung.at',
-    publishedAt: '2026-03-17T06:00:00Z',
-    score: 78,
-    summary: 'In Graz entstehen immer mehr Gemeinschaftsgärten, in denen Menschen verschiedener Herkunft gemeinsam anbauen, kochen und feiern. Ein Grazer Verein koordiniert mittlerweile 24 solcher Projekte.',
-  },
-  {
-    id: 6,
-    title: 'Berliner Schüler gewinnen internationalen Robotik-Wettbewerb',
-    url: 'https://example.com/robotik-berlin',
-    source: 'spiegel.de',
-    publishedAt: '2026-03-15T16:00:00Z',
-    score: 82,
-    summary: 'Ein Team der Geschwister-Scholl-Oberschule Berlin hat beim World Robot Olympiad den ersten Platz in der Kategorie „Future Engineers" belegt – und damit alle 47 Teilnehmerländer hinter sich gelassen.',
-  },
-  {
-    id: 7,
-    title: 'Neues Bildungsprogramm macht Coding für alle Altersgruppen zugänglich',
-    url: 'https://example.com/coding-bildung',
-    source: 'golem.de',
-    publishedAt: '2026-03-13T09:00:00Z',
-    score: 74,
-    summary: 'Das neue Förderprogramm „CodeForAll" bietet kostenlosen Programmierunterricht für Kinder ab 6 Jahren bis hin zu Senioren – und verzeichnet bereits über 50.000 aktive Teilnehmer in Deutschland.',
-  },
-  {
-    id: 8,
-    title: 'Österreich investiert Milliarden in Bahnausbau für klimafreundliches Reisen',
-    url: 'https://example.com/bahn-ausbau-at',
-    source: 'orf.at',
-    publishedAt: '2026-03-17T12:00:00Z',
-    score: 90,
-    summary: 'Das Klimaschutzministerium hat ein 18-Milliarden-Euro-Paket für den Ausbau des österreichischen Schienennetzes beschlossen – mit neuen Hochgeschwindigkeitstrassen und dichterem Regionalverkehr.',
-  },
+    imageUrl: null,
+    upvotes: 0,
+    downvotes: 0
+  }
 ]
 
-onMounted(async () => {
+function normalizeArticle(article) {
+  return {
+    ...article,
+    summary: article.summary ?? article.description ?? 'Kein Kurztext verfügbar.',
+    imageUrl: typeof article.imageUrl === 'string' && article.imageUrl.trim() !== ''
+      ? article.imageUrl.trim()
+      : null,
+    upvotes: article.upvotes ?? 0,
+    downvotes: article.downvotes ?? 0
+  }
+}
+
+function initLocalState(list) {
+  list.forEach(a => {
+    likes.value[a.id] = a.upvotes ?? 0
+    liked.value[a.id] = liked.value[a.id] ?? false
+    comments.value[a.id] = comments.value[a.id] ?? []
+    imageErrors.value[a.id] = imageErrors.value[a.id] ?? false
+  })
+}
+
+async function loadArticles() {
   try {
     const data = await fetchArticles()
-    articles.value = data.length > 0 ? data : fallbackArticles
+    const normalized = (data ?? []).map(normalizeArticle)
+
+    articles.value = normalized.length > 0 ? normalized : fallbackArticles
+    error.value = normalized.length > 0
+      ? null
+      : 'Noch keine Artikel im Backend – Platzhalter-Daten werden angezeigt.'
+
+    initLocalState(articles.value)
   } catch (e) {
     console.warn('Backend nicht erreichbar:', e)
     error.value = 'Backend nicht erreichbar – Platzhalter-Daten werden angezeigt.'
     articles.value = fallbackArticles
+    initLocalState(fallbackArticles)
   } finally {
     loading.value = false
   }
+}
 
-  const init = (list) => list.forEach(a => {
-    likes.value[a.id]    = likes.value[a.id]    ?? Math.floor(Math.random() * 40 + 5)
-    liked.value[a.id]    = liked.value[a.id]    ?? false
-    comments.value[a.id] = comments.value[a.id] ?? []
-  })
-  init(fallbackArticles)
+onMounted(async () => {
+  await loadArticles()
 })
 
-const sortedArticles   = computed(() => [...articles.value].sort((a, b) => b.score - a.score))
-const featuredArticle  = computed(() => sortedArticles.value[0] ?? null)
-const mainArticles     = computed(() => sortedArticles.value.slice(1, 4))
-const sidebarArticles  = computed(() => sortedArticles.value.slice(0, 5))
+const sortedArticles = computed(() => [...articles.value].sort((a, b) => b.score - a.score))
+const featuredArticle = computed(() => sortedArticles.value[0] ?? null)
+const mainArticles = computed(() => sortedArticles.value.slice(1, visibleCount.value + 1))
+const sidebarArticles = computed(() => sortedArticles.value.slice(0, 5))
+const hasMoreArticles = computed(() => sortedArticles.value.length > visibleCount.value + 1)
 
-function toggleLike(id) {
-  if (liked.value[id]) { likes.value[id]--; liked.value[id] = false }
-  else                 { likes.value[id]++; liked.value[id] = true  }
+async function toggleLike(id) {
+  const article = articles.value.find(a => a.id === id)
+  if (!article) return
+
+  try {
+    let updated
+
+    if (liked.value[id]) {
+      updated = await dislikeArticle(id)
+      liked.value[id] = false
+    } else {
+      updated = await likeArticle(id)
+      liked.value[id] = true
+    }
+
+    const normalized = normalizeArticle(updated)
+    const index = articles.value.findIndex(a => a.id === id)
+
+    if (index !== -1) {
+      articles.value[index] = normalized
+    }
+
+    if (selectedArticle.value?.id === id) {
+      selectedArticle.value = normalized
+    }
+
+    likes.value[id] = normalized.upvotes ?? 0
+  } catch (e) {
+    alert('Like/Dislike fehlgeschlagen: ' + e.message)
+  }
 }
 
 function submitComment(articleId) {
@@ -156,9 +183,19 @@ function scoreBadge(score) {
 }
 
 function placeholderImg(source, variant) {
-  const sizes  = { hero: '900x440', card: '540x300', thumb: '96x96', detail: '900x380' }
+  const sizes = { hero: '900x440', card: '540x300', thumb: '96x96', detail: '900x380' }
   const shades = { hero: 'f0f0f0/999', card: 'f5f5f5/aaa', thumb: 'eee/bbb', detail: 'f0f0f0/888' }
   return `https://placehold.co/${sizes[variant]}/${shades[variant]}?text=${encodeURIComponent(source)}`
+}
+
+function getImage(article, variant) {
+  if (!article) return placeholderImg('HappyPedia', variant)
+  if (imageErrors.value[article.id]) return placeholderImg(article.source ?? 'HappyPedia', variant)
+  return article.imageUrl || placeholderImg(article.source ?? 'HappyPedia', variant)
+}
+
+function handleImageError(articleId) {
+  imageErrors.value[articleId] = true
 }
 
 const categories = [
@@ -171,18 +208,40 @@ const categories = [
 ]
 
 const seeding = ref(false)
+
 async function handleSeed() {
   seeding.value = true
   try {
-    const msg  = await seedArticles()
-    alert(msg)
-    const data = await fetchArticles()
-    articles.value = data
+    await fetchArticlesFromFeeds()
+    await loadArticles()
+    alert('Artikel erfolgreich aus RSS-Feeds geladen.')
   } catch (e) {
-    alert('Seed fehlgeschlagen: ' + e.message)
+    alert('Fetch fehlgeschlagen: ' + e.message)
   } finally {
     seeding.value = false
   }
+}
+
+async function handleDeleteArticle(id) {
+  try {
+    await deleteArticle(id)
+    articles.value = articles.value.filter(a => a.id !== id)
+
+    delete likes.value[id]
+    delete liked.value[id]
+    delete comments.value[id]
+    delete imageErrors.value[id]
+
+    if (selectedArticle.value?.id === id) {
+      closeArticle()
+    }
+  } catch (e) {
+    alert('Löschen fehlgeschlagen: ' + e.message)
+  }
+}
+
+function loadMoreArticles() {
+  visibleCount.value += 6
 }
 </script>
 
@@ -232,9 +291,10 @@ async function handleSeed() {
         <div class="col-primary">
 
           <!-- FEATURED -->
-          <article v-if="featuredArticle" class="featured" @click="openArticle(featuredArticle)"
-                   role="button" tabindex="0" @keydown.enter="openArticle(featuredArticle)">
-            <img :src="placeholderImg(featuredArticle.source, 'hero')" :alt="featuredArticle.title" class="featured-img" />
+          <article v-if="featuredArticle" class="featured" @click="openArticle(featuredArticle)" role="button"
+            tabindex="0" @keydown.enter="openArticle(featuredArticle)">
+            <img :src="getImage(featuredArticle, 'hero')" :alt="featuredArticle.title" class="featured-img"
+              @error="handleImageError(featuredArticle.id)" />
             <div class="featured-body">
               <span class="badge">{{ scoreBadge(featuredArticle.score) }}</span>
               <h1 class="featured-title">{{ featuredArticle.title }}</h1>
@@ -254,9 +314,9 @@ async function handleSeed() {
 
           <!-- CARDS -->
           <div class="card-grid">
-            <article v-for="art in mainArticles" :key="art.id" class="card"
-                     @click="openArticle(art)" role="button" tabindex="0" @keydown.enter="openArticle(art)">
-              <img :src="placeholderImg(art.source, 'card')" :alt="art.title" class="card-img" />
+            <article v-for="art in mainArticles" :key="art.id" class="card" @click="openArticle(art)" role="button"
+              tabindex="0" @keydown.enter="openArticle(art)"><img :src="getImage(art, 'card')" :alt="art.title"
+                class="card-img" @error="handleImageError(art.id)" />
               <div class="card-body">
                 <div class="card-badges">
                   <span class="badge">{{ scoreBadge(art.score) }}</span>
@@ -273,7 +333,9 @@ async function handleSeed() {
           </div>
 
           <div class="load-more-wrap">
-            <a href="#" class="btn-load-more">Weitere Artikel</a>
+            <button v-if="hasMoreArticles" class="btn-load-more" @click="loadMoreArticles">
+              Weitere Artikel
+            </button>
           </div>
         </div>
 
@@ -292,8 +354,8 @@ async function handleSeed() {
           <div class="widget">
             <h4 class="widget-title">Höchster Score</h4>
             <ol class="rank-list">
-              <li v-for="(art, i) in sidebarArticles" :key="art.id" class="rank-item"
-                  @click="openArticle(art)" role="button" tabindex="0" @keydown.enter="openArticle(art)">
+              <li v-for="(art, i) in sidebarArticles" :key="art.id" class="rank-item" @click="openArticle(art)"
+                role="button" tabindex="0" @keydown.enter="openArticle(art)">
                 <span class="rank-num">{{ i + 1 }}</span>
                 <div class="rank-info">
                   <p class="rank-title">{{ art.title }}</p>
@@ -346,85 +408,92 @@ async function handleSeed() {
       <div v-if="selectedArticle" class="hp-overlay" @click.self="closeArticle">
         <div class="hp-dialog" role="dialog" aria-modal="true" @click.stop>
 
-        <div class="hp-dialog-head">
-          <div class="hp-dialog-head-badges">
-            <span class="badge">{{ scoreBadge(selectedArticle.score) }}</span>
-            <span class="badge badge-outline">{{ selectedArticle.source }}</span>
+          <div class="hp-dialog-head">
+            <div class="hp-dialog-head-badges">
+              <span class="badge">{{ scoreBadge(selectedArticle.score) }}</span>
+              <span class="badge badge-outline">{{ selectedArticle.source }}</span>
+            </div>
+            <button class="hp-dialog-close" @click="closeArticle" aria-label="Schließen">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </button>
           </div>
-          <button class="hp-dialog-close" @click="closeArticle" aria-label="Schließen">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </button>
-        </div>
 
-        <div class="hp-dialog-scroll">
-          <img :src="placeholderImg(selectedArticle.source, 'detail')" :alt="selectedArticle.title" class="hp-dialog-img" />
+          <div class="hp-dialog-scroll">
+            <img :src="getImage(selectedArticle, 'detail')" :alt="selectedArticle.title" class="hp-dialog-img"
+              @error="handleImageError(selectedArticle.id)" />
 
-          <div class="hp-dialog-content">
-            <h2 class="hp-dialog-title">{{ selectedArticle.title }}</h2>
-            <div class="meta hp-dialog-meta">
-              <span>{{ selectedArticle.source }}</span>
-              <span class="sep" />
-              <span>{{ formatDate(selectedArticle.publishedAt) }}</span>
-              <span class="sep" />
-              <span>Score {{ selectedArticle.score }}</span>
-            </div>
+            <div class="hp-dialog-content">
+              <h2 class="hp-dialog-title">{{ selectedArticle.title }}</h2>
+              <div class="meta hp-dialog-meta">
+                <span>{{ selectedArticle.source }}</span>
+                <span class="sep" />
+                <span>{{ formatDate(selectedArticle.publishedAt) }}</span>
+                <span class="sep" />
+                <span>Score {{ selectedArticle.score }}</span>
+              </div>
 
-            <p class="hp-dialog-summary">{{ selectedArticle.summary ?? 'Kein Kurztext verfügbar.' }}</p>
+              <p class="hp-dialog-summary">{{ selectedArticle.summary ?? 'Kein Kurztext verfügbar.' }}</p>
 
-            <a :href="selectedArticle.url" target="_blank" rel="noopener" class="btn-original">
-              Originalartikel öffnen
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2h7v7M12 2L2 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
+              <a :href="selectedArticle.url" target="_blank" rel="noopener" class="btn-original">
+                Originalartikel öffnen
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M5 2h7v7M12 2L2 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </a>
 
-            <!-- Like -->
-            <div class="like-row">
-              <button class="like-btn" :class="{ active: liked[selectedArticle.id] }" @click="toggleLike(selectedArticle.id)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 11v10M3 13v6a2 2 0 002 2h11.6a2 2 0 002-1.6l1.3-8A2 2 0 0017.9 9H14V5a3 3 0 00-3-3l-1 1-3 6v2" :fill="liked[selectedArticle.id] ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>{{ likes[selectedArticle.id] ?? 0 }}</span>
-              </button>
-              <span class="like-hint">{{ liked[selectedArticle.id] ? 'Danke für dein Like!' : 'Hilf anderen, gute Nachrichten zu finden.' }}</span>
-            </div>
+              <!-- Like -->
+              <div class="like-row">
+                <button class="like-btn" :class="{ active: liked[selectedArticle.id] }"
+                  @click="toggleLike(selectedArticle.id)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M7 11v10M3 13v6a2 2 0 002 2h11.6a2 2 0 002-1.6l1.3-8A2 2 0 0017.9 9H14V5a3 3 0 00-3-3l-1 1-3 6v2"
+                      :fill="liked[selectedArticle.id] ? 'currentColor' : 'none'" stroke="currentColor"
+                      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  <span>{{ likes[selectedArticle.id] ?? 0 }}</span>
+                </button>
+                <span class="like-hint">{{ liked[selectedArticle.id] ? 'Danke für dein Like!' : 'Hilf anderen, gute Nachrichten zu finden.' }}</span>
+              </div>
 
-            <!-- Kommentare -->
-            <div class="comments">
-              <h4 class="comments-title">
-                Kommentare
-                <span class="comments-count">{{ (comments[selectedArticle.id] ?? []).length }}</span>
-              </h4>
+              <!-- Kommentare -->
+              <div class="comments">
+                <h4 class="comments-title">
+                  Kommentare
+                  <span class="comments-count">{{ (comments[selectedArticle.id] ?? []).length }}</span>
+                </h4>
 
-              <div class="comments-list">
-                <p v-if="(comments[selectedArticle.id] ?? []).length === 0" class="comments-empty">
-                  Noch keine Kommentare – schreib den ersten.
-                </p>
-                <div v-for="(c, idx) in (comments[selectedArticle.id] ?? [])" :key="idx" class="comment">
-                  <div class="comment-avatar">{{ c.author[0] }}</div>
-                  <div class="comment-body">
-                    <div class="comment-meta">
-                      <strong>{{ c.author }}</strong>
-                      <span>{{ c.date }}</span>
+                <div class="comments-list">
+                  <p v-if="(comments[selectedArticle.id] ?? []).length === 0" class="comments-empty">
+                    Noch keine Kommentare – schreib den ersten.
+                  </p>
+                  <div v-for="(c, idx) in (comments[selectedArticle.id] ?? [])" :key="idx" class="comment">
+                    <div class="comment-avatar">{{ c.author[0] }}</div>
+                    <div class="comment-body">
+                      <div class="comment-meta">
+                        <strong>{{ c.author }}</strong>
+                        <span>{{ c.date }}</span>
+                      </div>
+                      <p>{{ c.text }}</p>
                     </div>
-                    <p>{{ c.text }}</p>
                   </div>
                 </div>
-              </div>
 
-              <div class="comment-form">
-                <textarea
-                  v-model="commentInput"
-                  class="comment-input"
-                  placeholder="Dein Kommentar …"
-                  rows="2"
-                  @keydown.ctrl.enter="submitComment(selectedArticle.id)"
-                  @keydown.meta.enter="submitComment(selectedArticle.id)"
-                ></textarea>
-                <button class="btn-send" :disabled="!commentInput.trim()" @click="submitComment(selectedArticle.id)">
-                  Senden
-                </button>
+                <div class="comment-form">
+                  <textarea v-model="commentInput" class="comment-input" placeholder="Dein Kommentar …" rows="2"
+                    @keydown.ctrl.enter="submitComment(selectedArticle.id)"
+                    @keydown.meta.enter="submitComment(selectedArticle.id)"></textarea>
+                  <button class="btn-send" :disabled="!commentInput.trim()" @click="submitComment(selectedArticle.id)">
+                    Senden
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </Transition>
   </div>
@@ -432,29 +501,33 @@ async function handleSeed() {
 
 <style scoped>
 /* ─── RESET ──────────────────────────────────────────── */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 .app {
-  --c-bg:             #ffffff;
-  --c-surface:        #f5f5f7;
-  --c-surface-hover:  #ececee;
-  --c-border:         #d2d2d7;
-  --c-border-light:   #e8e8ed;
-  --c-text-primary:   #1d1d1f;
+  --c-bg: #ffffff;
+  --c-surface: #f5f5f7;
+  --c-surface-hover: #ececee;
+  --c-border: #d2d2d7;
+  --c-border-light: #e8e8ed;
+  --c-text-primary: #1d1d1f;
   --c-text-secondary: #6e6e73;
-  --c-text-tertiary:  #86868b;
-  --c-accent:         #2d8a3e;
-  --c-accent-light:   #e8f5e9;
-  --c-accent-hover:   #24712f;
-  --c-dark:           #1d1d1f;
-  --radius-s:         8px;
-  --radius-m:         12px;
-  --radius-l:         20px;
-  --shadow-card:      0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
-  --shadow-modal:     0 24px 80px rgba(0,0,0,.18);
-  --font-display:     'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
-  --font-body:        'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
-  --transition:       .2s cubic-bezier(.4,0,.2,1);
+  --c-text-tertiary: #86868b;
+  --c-accent: #2d8a3e;
+  --c-accent-light: #e8f5e9;
+  --c-accent-hover: #24712f;
+  --c-dark: #1d1d1f;
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 20px;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, .06), 0 4px 12px rgba(0, 0, 0, .04);
+  --shadow-modal: 0 24px 80px rgba(0, 0, 0, .18);
+  --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --font-body: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --transition: .2s cubic-bezier(.4, 0, .2, 1);
 
   font-family: var(--font-body);
   color: var(--c-text-primary);
@@ -468,7 +541,7 @@ async function handleSeed() {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255,255,255,.72);
+  background: rgba(255, 255, 255, .72);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--c-border-light);
@@ -528,6 +601,7 @@ async function handleSeed() {
   border-radius: var(--radius-s);
   transition: background var(--transition), color var(--transition);
 }
+
 .nav-link:hover {
   background: var(--c-surface);
   color: var(--c-text-primary);
@@ -551,9 +625,10 @@ async function handleSeed() {
   outline: none;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
+
 .search-field:focus {
   border-color: var(--c-accent);
-  box-shadow: 0 0 0 3px rgba(45,138,62,.12);
+  box-shadow: 0 0 0 3px rgba(45, 138, 62, .12);
 }
 
 .btn-login {
@@ -566,7 +641,10 @@ async function handleSeed() {
   text-decoration: none;
   transition: background var(--transition);
 }
-.btn-login:hover { background: var(--c-accent-hover); }
+
+.btn-login:hover {
+  background: var(--c-accent-hover);
+}
 
 /* ─── LOADING ────────────────────────────────────────── */
 .loading-state {
@@ -585,7 +663,12 @@ async function handleSeed() {
   border-radius: 50%;
   animation: spin .7s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg) } }
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg)
+  }
+}
 
 /* ─── MAIN ───────────────────────────────────────────── */
 .main {
@@ -616,8 +699,15 @@ async function handleSeed() {
   cursor: pointer;
   transition: background var(--transition);
 }
-.btn-seed:hover { background: var(--c-surface); }
-.btn-seed:disabled { opacity: .5; cursor: default; }
+
+.btn-seed:hover {
+  background: var(--c-surface);
+}
+
+.btn-seed:disabled {
+  opacity: .5;
+  cursor: default;
+}
 
 .dateline {
   font-size: 13px;
@@ -634,9 +724,18 @@ async function handleSeed() {
 }
 
 @media (max-width: 960px) {
-  .grid-layout { grid-template-columns: 1fr; gap: 40px; }
-  .nav-links { display: none; }
-  .search-field { width: 140px; }
+  .grid-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .search-field {
+    width: 140px;
+  }
 }
 
 /* ─── FEATURED ───────────────────────────────────────── */
@@ -648,6 +747,7 @@ async function handleSeed() {
   transition: transform var(--transition), box-shadow var(--transition);
   margin-bottom: 40px;
 }
+
 .featured:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-card);
@@ -693,6 +793,7 @@ async function handleSeed() {
   background: var(--c-accent-light);
   color: var(--c-accent);
 }
+
 .badge-outline {
   background: transparent;
   border: 1px solid var(--c-border);
@@ -733,10 +834,15 @@ async function handleSeed() {
 }
 
 @media (max-width: 720px) {
-  .card-grid { grid-template-columns: 1fr 1fr; }
+  .card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
+
 @media (max-width: 480px) {
-  .card-grid { grid-template-columns: 1fr; }
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
@@ -747,6 +853,7 @@ async function handleSeed() {
   cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition);
 }
+
 .card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-card);
@@ -797,6 +904,7 @@ async function handleSeed() {
   text-decoration: none;
   transition: background var(--transition), color var(--transition);
 }
+
 .btn-load-more:hover {
   background: var(--c-accent);
   color: #fff;
@@ -835,6 +943,7 @@ async function handleSeed() {
   color: var(--c-text-secondary);
   transition: background var(--transition), color var(--transition);
 }
+
 .tag:hover {
   background: var(--c-accent-light);
   color: var(--c-accent);
@@ -855,8 +964,18 @@ async function handleSeed() {
   cursor: pointer;
   transition: background var(--transition);
 }
-.rank-item:last-child { border-bottom: none; }
-.rank-item:hover { background: var(--c-surface); margin: 0 -12px; padding-left: 12px; padding-right: 12px; border-radius: var(--radius-s); }
+
+.rank-item:last-child {
+  border-bottom: none;
+}
+
+.rank-item:hover {
+  background: var(--c-surface);
+  margin: 0 -12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border-radius: var(--radius-s);
+}
 
 .rank-num {
   font-family: var(--font-display);
@@ -868,7 +987,9 @@ async function handleSeed() {
   padding-top: 2px;
 }
 
-.rank-info { flex: 1; }
+.rank-info {
+  flex: 1;
+}
 
 .rank-title {
   font-size: 13px;
@@ -899,7 +1020,10 @@ async function handleSeed() {
 }
 
 @media (max-width: 720px) {
-  .footer-inner { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .footer-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
 }
 
 .footer-desc {
@@ -926,7 +1050,10 @@ async function handleSeed() {
   padding: 3px 0;
   transition: color var(--transition);
 }
-.footer-col a:hover { color: var(--c-text-primary); }
+
+.footer-col a:hover {
+  color: var(--c-text-primary);
+}
 
 .footer-bottom {
   max-width: 1120px;
@@ -942,7 +1069,7 @@ async function handleSeed() {
 .hp-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.45);
+  background: rgba(0, 0, 0, .45);
   z-index: 200;
   display: flex;
   align-items: flex-start;
@@ -968,7 +1095,10 @@ async function handleSeed() {
   border-bottom: 1px solid var(--c-border-light);
 }
 
-.hp-dialog-head-badges { display: flex; gap: 6px; }
+.hp-dialog-head-badges {
+  display: flex;
+  gap: 6px;
+}
 
 .hp-dialog-close {
   width: 32px;
@@ -983,7 +1113,10 @@ async function handleSeed() {
   color: var(--c-text-secondary);
   transition: background var(--transition);
 }
-.hp-dialog-close:hover { background: var(--c-surface-hover); }
+
+.hp-dialog-close:hover {
+  background: var(--c-surface-hover);
+}
 
 .hp-dialog-scroll {
   max-height: calc(100vh - 10rem);
@@ -997,7 +1130,9 @@ async function handleSeed() {
   display: block;
 }
 
-.hp-dialog-content { padding: 28px; }
+.hp-dialog-content {
+  padding: 28px;
+}
 
 .hp-dialog-title {
   font-family: var(--font-display);
@@ -1009,7 +1144,9 @@ async function handleSeed() {
   margin-bottom: 8px;
 }
 
-.hp-dialog-meta { margin-bottom: 16px; }
+.hp-dialog-meta {
+  margin-bottom: 16px;
+}
 
 .hp-dialog-summary {
   font-size: 15px;
@@ -1032,6 +1169,7 @@ async function handleSeed() {
   transition: background var(--transition), color var(--transition);
   margin-bottom: 28px;
 }
+
 .btn-original:hover {
   background: var(--c-accent);
   color: #fff;
@@ -1062,15 +1200,18 @@ async function handleSeed() {
   color: var(--c-text-secondary);
   transition: all var(--transition);
 }
+
 .like-btn:hover {
   border-color: var(--c-accent);
   color: var(--c-accent);
 }
+
 .like-btn.active {
   background: var(--c-accent);
   border-color: var(--c-accent);
   color: #fff;
 }
+
 .like-btn.active:hover {
   background: var(--c-accent-hover);
   border-color: var(--c-accent-hover);
@@ -1151,7 +1292,10 @@ async function handleSeed() {
   font-size: 12px;
   color: var(--c-text-tertiary);
 }
-.comment-meta strong { color: var(--c-text-primary); }
+
+.comment-meta strong {
+  color: var(--c-text-primary);
+}
 
 .comment-body p {
   margin: 0;
@@ -1181,9 +1325,10 @@ async function handleSeed() {
   background: #fff;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
+
 .comment-input:focus {
   border-color: var(--c-accent);
-  box-shadow: 0 0 0 3px rgba(45,138,62,.1);
+  box-shadow: 0 0 0 3px rgba(45, 138, 62, .1);
 }
 
 .btn-send {
@@ -1198,33 +1343,49 @@ async function handleSeed() {
   transition: background var(--transition), transform var(--transition);
   white-space: nowrap;
 }
-.btn-send:hover { background: var(--c-accent-hover); transform: scale(1.02); }
-.btn-send:disabled { opacity: .35; cursor: default; transform: none; }
+
+.btn-send:hover {
+  background: var(--c-accent-hover);
+  transform: scale(1.02);
+}
+
+.btn-send:disabled {
+  opacity: .35;
+  cursor: default;
+  transform: none;
+}
 </style>
 
 <style>
 .hp-fade-enter-active {
   transition: opacity .25s ease;
 }
+
 .hp-fade-leave-active {
   transition: opacity .2s ease;
 }
+
 .hp-fade-enter-active .hp-dialog {
-  transition: transform .3s cubic-bezier(.16,1,.3,1), opacity .25s ease;
+  transition: transform .3s cubic-bezier(.16, 1, .3, 1), opacity .25s ease;
 }
+
 .hp-fade-leave-active .hp-dialog {
   transition: transform .2s ease, opacity .2s ease;
 }
+
 .hp-fade-enter-from {
   opacity: 0;
 }
+
 .hp-fade-enter-from .hp-dialog {
   opacity: 0;
   transform: translateY(24px) scale(.97);
 }
+
 .hp-fade-leave-to {
   opacity: 0;
 }
+
 .hp-fade-leave-to .hp-dialog {
   opacity: 0;
   transform: translateY(12px) scale(.98);

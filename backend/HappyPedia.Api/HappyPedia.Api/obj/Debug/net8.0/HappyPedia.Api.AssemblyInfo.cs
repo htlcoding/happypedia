@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HappyPedia.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+12614a20692036dabf458645c58ebf69017e5259")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+52e83ba3c3de43b2bee1138fc08af90258ec9277")]
 [assembly: System.Reflection.AssemblyProductAttribute("HappyPedia.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HappyPedia.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
