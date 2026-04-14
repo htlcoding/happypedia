@@ -5,8 +5,21 @@ import {
   fetchArticlesFromFeeds,
   likeArticle,
   dislikeArticle,
+<<<<<<< HEAD
   deleteArticle
 } from './services/api'
+=======
+} from './services/api'
+
+// Backend-Artikel (description, imageUrl, upvotes/downvotes) in das
+// vom Template erwartete Format bringen (summary, likes …).
+function normalizeArticle(a) {
+  return {
+    ...a,
+    summary: a.summary ?? a.description ?? '',
+  }
+}
+>>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
 
 const articles = ref([])
 const loading = ref(true)
@@ -60,6 +73,7 @@ const fallbackArticles = [
   }
 ]
 
+<<<<<<< HEAD
 function normalizeArticle(article) {
   return {
     ...article,
@@ -92,18 +106,44 @@ async function loadArticles() {
       : 'Noch keine Artikel im Backend – Platzhalter-Daten werden angezeigt.'
 
     initLocalState(articles.value)
+=======
+async function loadArticles() {
+  try {
+    const data = await fetchArticles()
+    const normalized = Array.isArray(data) ? data.map(normalizeArticle) : []
+    articles.value = normalized.length > 0 ? normalized : fallbackArticles
+    if (normalized.length > 0) error.value = null
+>>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
   } catch (e) {
     console.warn('Backend nicht erreichbar:', e)
     error.value = 'Backend nicht erreichbar – Platzhalter-Daten werden angezeigt.'
     articles.value = fallbackArticles
+<<<<<<< HEAD
     initLocalState(fallbackArticles)
   } finally {
     loading.value = false
+=======
+>>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
   }
+}
+
+<<<<<<< HEAD
+onMounted(async () => {
+  await loadArticles()
+=======
+  const init = (list) => list.forEach(a => {
+    likes.value[a.id]    = likes.value[a.id]    ?? (a.upvotes ?? Math.floor(Math.random() * 40 + 5))
+    liked.value[a.id]    = liked.value[a.id]    ?? false
+    comments.value[a.id] = comments.value[a.id] ?? []
+  })
+  init(fallbackArticles)
+  init(articles.value)
 }
 
 onMounted(async () => {
   await loadArticles()
+  loading.value = false
+>>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
 })
 
 const sortedArticles = computed(() => [...articles.value].sort((a, b) => b.score - a.score))
@@ -113,6 +153,7 @@ const sidebarArticles = computed(() => sortedArticles.value.slice(0, 5))
 const hasMoreArticles = computed(() => sortedArticles.value.length > visibleCount.value + 1)
 
 async function toggleLike(id) {
+<<<<<<< HEAD
   const article = articles.value.find(a => a.id === id)
   if (!article) return
 
@@ -141,6 +182,30 @@ async function toggleLike(id) {
     likes.value[id] = normalized.upvotes ?? 0
   } catch (e) {
     alert('Like/Dislike fehlgeschlagen: ' + e.message)
+=======
+  // Optimistisches UI-Update
+  const wasLiked = liked.value[id]
+  if (wasLiked) { likes.value[id]--; liked.value[id] = false }
+  else          { likes.value[id]++; liked.value[id] = true  }
+
+  // Backend synchronisieren (nur für echte Artikel aus dem Backend)
+  const article = articles.value.find(a => a.id === id)
+  const isBackendArticle = article && typeof article.upvotes === 'number'
+  if (!isBackendArticle) return
+
+  try {
+    const updated = wasLiked ? await dislikeArticle(id) : await likeArticle(id)
+    if (updated) {
+      const idx = articles.value.findIndex(a => a.id === id)
+      if (idx >= 0) articles.value[idx] = normalizeArticle(updated)
+      likes.value[id] = updated.upvotes
+    }
+  } catch (e) {
+    console.warn('Like konnte nicht gespeichert werden:', e)
+    // Rollback
+    if (wasLiked) { likes.value[id]++; liked.value[id] = true }
+    else          { likes.value[id]--; liked.value[id] = false }
+>>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
   }
 }
 
@@ -212,11 +277,20 @@ const seeding = ref(false)
 async function handleSeed() {
   seeding.value = true
   try {
+<<<<<<< HEAD
     await fetchArticlesFromFeeds()
     await loadArticles()
     alert('Artikel erfolgreich aus RSS-Feeds geladen.')
   } catch (e) {
     alert('Fetch fehlgeschlagen: ' + e.message)
+=======
+    const result = await fetchArticlesFromFeeds()
+    const imported = result?.imported ?? 0
+    alert(`${imported} Artikel aus den RSS-Feeds importiert.`)
+    await loadArticles()
+  } catch (e) {
+    alert('Artikel-Import fehlgeschlagen: ' + e.message)
+>>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
   } finally {
     seeding.value = false
   }
@@ -278,7 +352,7 @@ function loadMoreArticles() {
       <div v-if="error" class="error-banner">
         <span>{{ error }}</span>
         <button class="btn-seed" :disabled="seeding" @click="handleSeed">
-          {{ seeding ? 'Seeding …' : 'Seed Testdaten' }}
+          {{ seeding ? 'Importiere …' : 'Artikel aus RSS laden' }}
         </button>
       </div>
 
