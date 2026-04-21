@@ -444,3 +444,7 @@ C:/Mac/Home/Documents/GitHub/happypedia/backend/HappyPedia.Api/HappyPedia.Api/ob
 /Users/merajsoltani/Documents/GitHub/happypedia/backend/HappyPedia.Api/HappyPedia.Api/obj/Debug/net8.0/HappyPedia.Api.pdb
 /Users/merajsoltani/Documents/GitHub/happypedia/backend/HappyPedia.Api/HappyPedia.Api/obj/Debug/net8.0/HappyPedia.Api.genruntimeconfig.cache
 /Users/merajsoltani/Documents/GitHub/happypedia/backend/HappyPedia.Api/HappyPedia.Api/obj/Debug/net8.0/ref/HappyPedia.Api.dll
+C:\Users\Dell_Leihgerät\Documents\GitHub\happypedia\backend\HappyPedia.Api\HappyPedia.Api\obj\Debug\net8.0\HappyPedia.Api.csproj.AssemblyReference.cache
+C:\Users\Dell_Leihgerät\Documents\GitHub\happypedia\backend\HappyPedia.Api\HappyPedia.Api\obj\Debug\net8.0\HappyPedia.Api.dll
+C:\Users\Dell_Leihgerät\Documents\GitHub\happypedia\backend\HappyPedia.Api\HappyPedia.Api\obj\Debug\net8.0\refint\HappyPedia.Api.dll
+C:\Users\Dell_Leihgerät\Documents\GitHub\happypedia\backend\HappyPedia.Api\HappyPedia.Api\obj\Debug\net8.0\HappyPedia.Api.pdb
