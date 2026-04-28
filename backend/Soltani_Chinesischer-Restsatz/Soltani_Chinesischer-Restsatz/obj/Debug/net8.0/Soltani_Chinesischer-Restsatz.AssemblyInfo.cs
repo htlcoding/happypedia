@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("HappyPedia.Api")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("Soltani_Chinesischer-Restsatz")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+86a776a654b9b00679df1ee580e2b419e86cf095")]
-[assembly: System.Reflection.AssemblyProductAttribute("HappyPedia.Api")]
-[assembly: System.Reflection.AssemblyTitleAttribute("HappyPedia.Api")]
+[assembly: System.Reflection.AssemblyProductAttribute("Soltani_Chinesischer-Restsatz")]
+[assembly: System.Reflection.AssemblyTitleAttribute("Soltani_Chinesischer-Restsatz")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Von der MSBuild WriteCodeFragment-Klasse generiert.

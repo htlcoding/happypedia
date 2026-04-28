@@ -1,0 +1,15 @@
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/Soltani_Chinesischer-Restsatz.GeneratedMSBuildEditorConfig.editorconfig
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/Soltani_Chinesischer-Restsatz.AssemblyInfoInputs.cache
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/Soltani_Chinesischer-Restsatz.AssemblyInfo.cs
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/Soltani_Chinesischer-Restsatz.csproj.CoreCompileInputs.cache
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/Soltani_Chinesischer-Restsatz.sourcelink.json
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/bin/Debug/net8.0/Soltani_Chinesischer-Restsatz
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/bin/Debug/net8.0/Soltani_Chinesischer-Restsatz.deps.json
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/bin/Debug/net8.0/Soltani_Chinesischer-Restsatz.runtimeconfig.json
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/bin/Debug/net8.0/Soltani_Chinesischer-Restsatz.dll
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/bin/Debug/net8.0/Soltani_Chinesischer-Restsatz.pdb
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/Soltani_Chinesischer-Restsatz.dll
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/refint/Soltani_Chinesischer-Restsatz.dll
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/Soltani_Chinesischer-Restsatz.pdb
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/Soltani_Chinesischer-Restsatz.genruntimeconfig.cache
+/Users/merajsoltani/Documents/GitHub/happypedia/backend/Soltani_Chinesischer-Restsatz/Soltani_Chinesischer-Restsatz/obj/Debug/net8.0/ref/Soltani_Chinesischer-Restsatz.dll
