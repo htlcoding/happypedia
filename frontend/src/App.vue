@@ -5,21 +5,12 @@ import {
   fetchArticlesFromFeeds,
   likeArticle,
   dislikeArticle,
-<<<<<<< HEAD
-  deleteArticle
+  deleteArticle,
+  login,
+  register,
+  fetchComments,
+  addComment
 } from './services/api'
-=======
-} from './services/api'
-
-// Backend-Artikel (description, imageUrl, upvotes/downvotes) in das
-// vom Template erwartete Format bringen (summary, likes …).
-function normalizeArticle(a) {
-  return {
-    ...a,
-    summary: a.summary ?? a.description ?? '',
-  }
-}
->>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
 
 const articles = ref([])
 const loading = ref(true)
@@ -29,67 +20,87 @@ const commentInput = ref('')
 
 const likes = ref({})
 const liked = ref({})
+const disliked = ref({})
 const comments = ref({})
 const imageErrors = ref({})
-
 const visibleCount = ref(9)
 
-const fallbackArticles = [
-  {
-    id: 1,
-    title: 'Wiener Startup entwickelt App gegen Lebensmittelverschwendung',
-    url: 'https://example.com/wiener-startup-food',
-    source: 'derstandard.at',
-    publishedAt: '2026-03-16T10:00:00Z',
-    score: 92,
-    summary: 'Ein junges Wiener Startup hat eine App entwickelt, die Supermärkte und Restaurants dabei hilft, überschüssige Lebensmittel an Bedürftige weiterzugeben – und damit Tonnen von Lebensmittelabfällen zu vermeiden.',
-    imageUrl: null,
-    upvotes: 0,
-    downvotes: 0
-  },
-  {
-    id: 2,
-    title: 'Neue Studie: Ehrenamt stärkt mentale Gesundheit nachweislich',
-    url: 'https://example.com/ehrenamt-studie',
-    source: 'zeit.de',
-    publishedAt: '2026-03-15T08:30:00Z',
-    score: 88,
-    summary: 'Eine großangelegte Studie mit über 10.000 Teilnehmern belegt: Wer regelmäßig ehrenamtlich tätig ist, berichtet signifikant seltener von Burnout, Einsamkeit und Depressionen.',
-    imageUrl: null,
-    upvotes: 0,
-    downvotes: 0
-  },
-  {
-    id: 3,
-    title: 'Solarenergie-Rekord in Deutschland: 60% des Stroms aus Erneuerbaren',
-    url: 'https://example.com/solar-rekord',
-    source: 'tagesschau.de',
-    publishedAt: '2026-03-16T14:00:00Z',
-    score: 95,
-    summary: 'Deutschland hat einen neuen Rekord bei erneuerbaren Energien aufgestellt: An einem sonnigen Frühlingstag deckten Solar-, Wind- und Wasserkraft gemeinsam 60 % des gesamten Strombedarfs.',
-    imageUrl: null,
-    upvotes: 0,
-    downvotes: 0
-  }
-]
+const user = ref(JSON.parse(localStorage.getItem('hp_user') || 'null'))
+const authOpen = ref(false)
+const authMode = ref('login')
+const authUsername = ref('')
+const authPassword = ref('')
+const authError = ref(null)
 
-<<<<<<< HEAD
+const fallbackArticles = []
+
+function openAuth(mode = 'login') {
+  authMode.value = mode
+  authOpen.value = true
+  authError.value = null
+}
+
+function closeAuth() {
+  authOpen.value = false
+  authUsername.value = ''
+  authPassword.value = ''
+  authError.value = null
+}
+
+async function handleAuth() {
+  authError.value = null
+
+  if (!authUsername.value.trim() || !authPassword.value.trim()) {
+    authError.value = 'Bitte Username und Passwort eingeben.'
+    return
+  }
+
+  try {
+    const result =
+      authMode.value === 'login'
+        ? await login(authUsername.value, authPassword.value)
+        : await register(authUsername.value, authPassword.value)
+
+    user.value = result
+    localStorage.setItem('hp_user', JSON.stringify(result))
+    closeAuth()
+  } catch (e) {
+    authError.value = e.message
+  }
+}
+
+function logout() {
+  user.value = null
+  localStorage.removeItem('hp_user')
+
+  Object.keys(liked.value).forEach((id) => {
+    liked.value[id] = false
+  })
+
+  Object.keys(disliked.value).forEach((id) => {
+    disliked.value[id] = false
+  })
+}
+
 function normalizeArticle(article) {
   return {
     ...article,
     summary: article.summary ?? article.description ?? 'Kein Kurztext verfügbar.',
-    imageUrl: typeof article.imageUrl === 'string' && article.imageUrl.trim() !== ''
-      ? article.imageUrl.trim()
-      : null,
+    imageUrl:
+      typeof article.imageUrl === 'string' && article.imageUrl.trim() !== ''
+        ? article.imageUrl.trim()
+        : null,
     upvotes: article.upvotes ?? 0,
-    downvotes: article.downvotes ?? 0
+    downvotes: article.downvotes ?? 0,
+    score: article.score ?? 0
   }
 }
 
 function initLocalState(list) {
-  list.forEach(a => {
+  list.forEach((a) => {
     likes.value[a.id] = a.upvotes ?? 0
     liked.value[a.id] = liked.value[a.id] ?? false
+    disliked.value[a.id] = disliked.value[a.id] ?? false
     comments.value[a.id] = comments.value[a.id] ?? []
     imageErrors.value[a.id] = imageErrors.value[a.id] ?? false
   })
@@ -101,130 +112,129 @@ async function loadArticles() {
     const normalized = (data ?? []).map(normalizeArticle)
 
     articles.value = normalized.length > 0 ? normalized : fallbackArticles
-    error.value = normalized.length > 0
-      ? null
-      : 'Noch keine Artikel im Backend – Platzhalter-Daten werden angezeigt.'
+    error.value =
+      normalized.length > 0
+        ? null
+        : 'Noch keine Artikel im Backend – Platzhalter-Daten werden angezeigt.'
 
     initLocalState(articles.value)
-=======
-async function loadArticles() {
-  try {
-    const data = await fetchArticles()
-    const normalized = Array.isArray(data) ? data.map(normalizeArticle) : []
-    articles.value = normalized.length > 0 ? normalized : fallbackArticles
-    if (normalized.length > 0) error.value = null
->>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
   } catch (e) {
     console.warn('Backend nicht erreichbar:', e)
     error.value = 'Backend nicht erreichbar – Platzhalter-Daten werden angezeigt.'
     articles.value = fallbackArticles
-<<<<<<< HEAD
     initLocalState(fallbackArticles)
   } finally {
     loading.value = false
-=======
->>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
   }
 }
 
-<<<<<<< HEAD
-onMounted(async () => {
-  await loadArticles()
-=======
-  const init = (list) => list.forEach(a => {
-    likes.value[a.id]    = likes.value[a.id]    ?? (a.upvotes ?? Math.floor(Math.random() * 40 + 5))
-    liked.value[a.id]    = liked.value[a.id]    ?? false
-    comments.value[a.id] = comments.value[a.id] ?? []
-  })
-  init(fallbackArticles)
-  init(articles.value)
-}
+onMounted(loadArticles)
 
-onMounted(async () => {
-  await loadArticles()
-  loading.value = false
->>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
-})
+const sortedArticles = computed(() =>
+  [...articles.value].sort((a, b) => b.score - a.score)
+)
 
-const sortedArticles = computed(() => [...articles.value].sort((a, b) => b.score - a.score))
 const featuredArticle = computed(() => sortedArticles.value[0] ?? null)
 const mainArticles = computed(() => sortedArticles.value.slice(1, visibleCount.value + 1))
 const sidebarArticles = computed(() => sortedArticles.value.slice(0, 5))
 const hasMoreArticles = computed(() => sortedArticles.value.length > visibleCount.value + 1)
 
 async function toggleLike(id) {
-<<<<<<< HEAD
-  const article = articles.value.find(a => a.id === id)
-  if (!article) return
+  if (!user.value) {
+    openAuth('login')
+    return
+  }
 
   try {
-    let updated
-
-    if (liked.value[id]) {
-      updated = await dislikeArticle(id)
-      liked.value[id] = false
-    } else {
-      updated = await likeArticle(id)
-      liked.value[id] = true
-    }
-
+    const wasLiked = liked.value[id]
+    const updated = await likeArticle(id)
     const normalized = normalizeArticle(updated)
-    const index = articles.value.findIndex(a => a.id === id)
 
-    if (index !== -1) {
-      articles.value[index] = normalized
-    }
+    const index = articles.value.findIndex((a) => a.id === id)
+    if (index !== -1) articles.value[index] = normalized
 
     if (selectedArticle.value?.id === id) {
       selectedArticle.value = normalized
     }
 
     likes.value[id] = normalized.upvotes ?? 0
-  } catch (e) {
-    alert('Like/Dislike fehlgeschlagen: ' + e.message)
-=======
-  // Optimistisches UI-Update
-  const wasLiked = liked.value[id]
-  if (wasLiked) { likes.value[id]--; liked.value[id] = false }
-  else          { likes.value[id]++; liked.value[id] = true  }
 
-  // Backend synchronisieren (nur für echte Artikel aus dem Backend)
-  const article = articles.value.find(a => a.id === id)
-  const isBackendArticle = article && typeof article.upvotes === 'number'
-  if (!isBackendArticle) return
-
-  try {
-    const updated = wasLiked ? await dislikeArticle(id) : await likeArticle(id)
-    if (updated) {
-      const idx = articles.value.findIndex(a => a.id === id)
-      if (idx >= 0) articles.value[idx] = normalizeArticle(updated)
-      likes.value[id] = updated.upvotes
-    }
+    liked.value[id] = !wasLiked
+    disliked.value[id] = false
   } catch (e) {
-    console.warn('Like konnte nicht gespeichert werden:', e)
-    // Rollback
-    if (wasLiked) { likes.value[id]++; liked.value[id] = true }
-    else          { likes.value[id]--; liked.value[id] = false }
->>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
+    alert(e.message)
   }
 }
 
-function submitComment(articleId) {
-  const text = commentInput.value.trim()
-  if (!text) return
-  if (!comments.value[articleId]) comments.value[articleId] = []
-  comments.value[articleId].push({
-    author: 'Du',
-    text,
-    date: new Date().toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-  })
-  commentInput.value = ''
+async function toggleDislike(id) {
+  if (!user.value) {
+    openAuth('login')
+    return
+  }
+
+  try {
+    const wasDisliked = disliked.value[id]
+    const updated = await dislikeArticle(id)
+    const normalized = normalizeArticle(updated)
+
+    const index = articles.value.findIndex((a) => a.id === id)
+    if (index !== -1) articles.value[index] = normalized
+
+    if (selectedArticle.value?.id === id) {
+      selectedArticle.value = normalized
+    }
+
+    likes.value[id] = normalized.upvotes ?? 0
+
+    disliked.value[id] = !wasDisliked
+    liked.value[id] = false
+  } catch (e) {
+    alert(e.message)
+  }
 }
 
-function openArticle(article) {
+async function submitComment(articleId) {
+  if (!user.value) {
+    openAuth('login')
+    return
+  }
+
+  const text = commentInput.value.trim()
+  if (!text) return
+
+  try {
+    const saved = await addComment(articleId, text)
+
+    if (!comments.value[articleId]) comments.value[articleId] = []
+
+    comments.value[articleId].unshift({
+      author: saved.username,
+      text: saved.text,
+      date: new Date(saved.createdAt).toLocaleDateString('de-AT')
+    })
+
+    commentInput.value = ''
+  } catch (e) {
+    alert(e.message)
+  }
+}
+
+async function openArticle(article) {
   selectedArticle.value = article
   commentInput.value = ''
   document.body.style.overflow = 'hidden'
+
+  try {
+    const data = await fetchComments(article.id)
+
+    comments.value[article.id] = data.map((c) => ({
+      author: c.username,
+      text: c.text,
+      date: new Date(c.createdAt).toLocaleDateString('de-AT')
+    }))
+  } catch {
+    comments.value[article.id] = comments.value[article.id] ?? []
+  }
 }
 
 function closeArticle() {
@@ -233,11 +243,20 @@ function closeArticle() {
 }
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(iso).toLocaleDateString('de-AT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
 }
 
 function formatDateLong() {
-  return new Date().toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return new Date().toLocaleDateString('de-AT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
 }
 
 function scoreBadge(score) {
@@ -248,14 +267,19 @@ function scoreBadge(score) {
 }
 
 function placeholderImg(source, variant) {
-  const sizes = { hero: '900x440', card: '540x300', thumb: '96x96', detail: '900x380' }
-  const shades = { hero: 'f0f0f0/999', card: 'f5f5f5/aaa', thumb: 'eee/bbb', detail: 'f0f0f0/888' }
+  const sizes = { hero: '900x440', card: '540x300', detail: '900x380' }
+  const shades = { hero: 'f0f0f0/999', card: 'f5f5f5/aaa', detail: 'f0f0f0/888' }
+
   return `https://placehold.co/${sizes[variant]}/${shades[variant]}?text=${encodeURIComponent(source)}`
 }
 
 function getImage(article, variant) {
   if (!article) return placeholderImg('HappyPedia', variant)
-  if (imageErrors.value[article.id]) return placeholderImg(article.source ?? 'HappyPedia', variant)
+
+  if (imageErrors.value[article.id]) {
+    return placeholderImg(article.source ?? 'HappyPedia', variant)
+  }
+
   return article.imageUrl || placeholderImg(article.source ?? 'HappyPedia', variant)
 }
 
@@ -269,28 +293,20 @@ const categories = [
   { label: 'Deutschland' },
   { label: 'Schweiz' },
   { label: 'Innovation' },
-  { label: 'Gesellschaft' },
+  { label: 'Gesellschaft' }
 ]
 
 const seeding = ref(false)
 
 async function handleSeed() {
   seeding.value = true
+
   try {
-<<<<<<< HEAD
     await fetchArticlesFromFeeds()
     await loadArticles()
     alert('Artikel erfolgreich aus RSS-Feeds geladen.')
   } catch (e) {
     alert('Fetch fehlgeschlagen: ' + e.message)
-=======
-    const result = await fetchArticlesFromFeeds()
-    const imported = result?.imported ?? 0
-    alert(`${imported} Artikel aus den RSS-Feeds importiert.`)
-    await loadArticles()
-  } catch (e) {
-    alert('Artikel-Import fehlgeschlagen: ' + e.message)
->>>>>>> 86a776a654b9b00679df1ee580e2b419e86cf095
   } finally {
     seeding.value = false
   }
@@ -299,16 +315,16 @@ async function handleSeed() {
 async function handleDeleteArticle(id) {
   try {
     await deleteArticle(id)
-    articles.value = articles.value.filter(a => a.id !== id)
+
+    articles.value = articles.value.filter((a) => a.id !== id)
 
     delete likes.value[id]
     delete liked.value[id]
+    delete disliked.value[id]
     delete comments.value[id]
     delete imageErrors.value[id]
 
-    if (selectedArticle.value?.id === id) {
-      closeArticle()
-    }
+    if (selectedArticle.value?.id === id) closeArticle()
   } catch (e) {
     alert('Löschen fehlgeschlagen: ' + e.message)
   }
@@ -317,58 +333,95 @@ async function handleDeleteArticle(id) {
 function loadMoreArticles() {
   visibleCount.value += 6
 }
-</script>
-
-<template>
+</script><template>
   <div class="app">
-
-    <!-- HEADER -->
     <header class="header">
       <div class="header-inner">
         <a href="#" class="logo">
           <span class="logo-mark">H</span>
           <span class="logo-text">HappyPedia</span>
         </a>
+
         <nav class="nav-links">
-          <a v-for="cat in categories" :key="cat.label" href="#" class="nav-link">{{ cat.label }}</a>
+          <a v-for="cat in categories" :key="cat.label" href="#" class="nav-link">
+            {{ cat.label }}
+          </a>
         </nav>
+
         <div class="header-actions">
           <input type="text" class="search-field" placeholder="Suchen …" />
-          <a href="#" class="btn-login">Anmelden</a>
+
+          <button v-if="!user" class="btn-login" @click="openAuth('login')">
+            Anmelden
+          </button>
+
+          <div v-else class="user-box">
+            <span class="user-label">Hi, {{ user.username }}</span>
+            <button class="btn-login" @click="logout">Logout</button>
+          </div>
         </div>
       </div>
     </header>
 
-    <!-- LOADING -->
+    <Transition name="auth-fade">
+      <div v-if="authOpen" class="auth-overlay" @click.self="closeAuth">
+        <div class="auth-card">
+          <button class="auth-close" @click="closeAuth">×</button>
+
+          <div class="auth-tabs">
+            <button class="auth-tab" :class="{ active: authMode === 'login' }" @click="authMode = 'login'">
+              Login
+            </button>
+            <button class="auth-tab" :class="{ active: authMode === 'register' }" @click="authMode = 'register'">
+              Registrieren
+            </button>
+          </div>
+
+          <h2>{{ authMode === 'login' ? 'Willkommen zurück' : 'Account erstellen' }}</h2>
+          <p class="auth-subtitle">
+            {{ authMode === 'login'
+              ? 'Melde dich an, um Artikel zu bewerten.'
+              : 'Erstelle einen Account, um Artikel zu liken und zu kommentieren.' }}
+          </p>
+
+          <input v-model="authUsername" class="auth-input" placeholder="Username" />
+          <input v-model="authPassword" class="auth-input" type="password" placeholder="Passwort"
+            @keydown.enter="handleAuth" />
+
+          <p v-if="authError" class="auth-error">{{ authError }}</p>
+
+          <button class="auth-submit" @click="handleAuth">
+            {{ authMode === 'login' ? 'Einloggen' : 'Registrieren' }}
+          </button>
+        </div>
+      </div>
+    </Transition>
+
     <div v-if="loading" class="loading-state">
       <div class="spinner" />
       <p>Artikel werden geladen …</p>
     </div>
 
-    <!-- CONTENT -->
     <main v-else class="main">
-
-      <!-- Error banner -->
       <div v-if="error" class="error-banner">
         <span>{{ error }}</span>
         <button class="btn-seed" :disabled="seeding" @click="handleSeed">
-          {{ seeding ? 'Importiere …' : 'Artikel aus RSS laden' }}
+          {{ seeding ? 'Lade …' : 'Artikel laden' }}
         </button>
       </div>
 
-      <!-- Date line -->
       <p class="dateline">{{ formatDateLong() }}</p>
 
       <div class="grid-layout">
-
-        <!-- PRIMARY COLUMN -->
         <div class="col-primary">
+          <article v-if="featuredArticle" class="featured" @click="openArticle(featuredArticle)">
+            <img
+              :src="getImage(featuredArticle, 'hero')"
+              :alt="featuredArticle.title"
+              class="featured-img"
+              @error="handleImageError(featuredArticle.id)"
+            />
 
-          <!-- FEATURED -->
-          <article v-if="featuredArticle" class="featured" @click="openArticle(featuredArticle)" role="button"
-            tabindex="0" @keydown.enter="openArticle(featuredArticle)">
-            <img :src="getImage(featuredArticle, 'hero')" :alt="featuredArticle.title" class="featured-img"
-              @error="handleImageError(featuredArticle.id)" />
             <div class="featured-body">
               <span class="badge">{{ scoreBadge(featuredArticle.score) }}</span>
               <h1 class="featured-title">{{ featuredArticle.title }}</h1>
@@ -383,14 +436,16 @@ function loadMoreArticles() {
             </div>
           </article>
 
-          <!-- SECTION -->
           <h2 class="section-title">Aktuelle Happy News</h2>
 
-          <!-- CARDS -->
           <div class="card-grid">
-            <article v-for="art in mainArticles" :key="art.id" class="card" @click="openArticle(art)" role="button"
-              tabindex="0" @keydown.enter="openArticle(art)"><img :src="getImage(art, 'card')" :alt="art.title"
-                class="card-img" @error="handleImageError(art.id)" />
+            <article v-for="art in mainArticles" :key="art.id" class="card" @click="openArticle(art)">
+              <img
+                :src="getImage(art, 'card')"
+                :alt="art.title"
+                class="card-img"
+                @error="handleImageError(art.id)"
+              />
               <div class="card-body">
                 <div class="card-badges">
                   <span class="badge">{{ scoreBadge(art.score) }}</span>
@@ -413,10 +468,7 @@ function loadMoreArticles() {
           </div>
         </div>
 
-        <!-- SIDEBAR -->
         <aside class="col-sidebar">
-
-          <!-- Kategorien -->
           <div class="widget">
             <h4 class="widget-title">Kategorien</h4>
             <div class="tag-cloud">
@@ -424,12 +476,10 @@ function loadMoreArticles() {
             </div>
           </div>
 
-          <!-- Top Scored -->
           <div class="widget">
             <h4 class="widget-title">Höchster Score</h4>
             <ol class="rank-list">
-              <li v-for="(art, i) in sidebarArticles" :key="art.id" class="rank-item" @click="openArticle(art)"
-                role="button" tabindex="0" @keydown.enter="openArticle(art)">
+              <li v-for="(art, i) in sidebarArticles" :key="art.id" class="rank-item" @click="openArticle(art)">
                 <span class="rank-num">{{ i + 1 }}</span>
                 <div class="rank-info">
                   <p class="rank-title">{{ art.title }}</p>
@@ -442,64 +492,28 @@ function loadMoreArticles() {
       </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <a href="#" class="logo">
-            <span class="logo-mark">H</span>
-            <span class="logo-text" style="color: var(--c-text-tertiary)">HappyPedia</span>
-          </a>
-          <p class="footer-desc">Positive Nachrichten aus dem DACH-Raum und der Welt.</p>
-        </div>
-        <div class="footer-col">
-          <h6>Regionen</h6>
-          <a href="#">Österreich</a>
-          <a href="#">Deutschland</a>
-          <a href="#">Schweiz</a>
-          <a href="#">International</a>
-        </div>
-        <div class="footer-col">
-          <h6>Über uns</h6>
-          <a href="#">Team</a>
-          <a href="#">Kontakt</a>
-          <a href="#">Quellen</a>
-        </div>
-        <div class="footer-col">
-          <h6>Rechtliches</h6>
-          <a href="#">Impressum</a>
-          <a href="#">Datenschutz</a>
-          <a href="#">AGB</a>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <small>© 2026 HappyPedia</small>
-      </div>
-    </footer>
-
-    <!-- DETAIL MODAL -->
     <Transition name="hp-fade">
       <div v-if="selectedArticle" class="hp-overlay" @click.self="closeArticle">
-        <div class="hp-dialog" role="dialog" aria-modal="true" @click.stop>
-
+        <div class="hp-dialog" @click.stop>
           <div class="hp-dialog-head">
             <div class="hp-dialog-head-badges">
               <span class="badge">{{ scoreBadge(selectedArticle.score) }}</span>
               <span class="badge badge-outline">{{ selectedArticle.source }}</span>
             </div>
-            <button class="hp-dialog-close" @click="closeArticle" aria-label="Schließen">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-              </svg>
-            </button>
+            <button class="hp-dialog-close" @click="closeArticle">×</button>
           </div>
 
           <div class="hp-dialog-scroll">
-            <img :src="getImage(selectedArticle, 'detail')" :alt="selectedArticle.title" class="hp-dialog-img"
-              @error="handleImageError(selectedArticle.id)" />
+            <img
+              :src="getImage(selectedArticle, 'detail')"
+              :alt="selectedArticle.title"
+              class="hp-dialog-img"
+              @error="handleImageError(selectedArticle.id)"
+            />
 
             <div class="hp-dialog-content">
               <h2 class="hp-dialog-title">{{ selectedArticle.title }}</h2>
+
               <div class="meta hp-dialog-meta">
                 <span>{{ selectedArticle.source }}</span>
                 <span class="sep" />
@@ -508,32 +522,42 @@ function loadMoreArticles() {
                 <span>Score {{ selectedArticle.score }}</span>
               </div>
 
-              <p class="hp-dialog-summary">{{ selectedArticle.summary ?? 'Kein Kurztext verfügbar.' }}</p>
+              <p class="hp-dialog-summary">{{ selectedArticle.summary }}</p>
 
               <a :href="selectedArticle.url" target="_blank" rel="noopener" class="btn-original">
                 Originalartikel öffnen
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M5 2h7v7M12 2L2 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
               </a>
 
-              <!-- Like -->
               <div class="like-row">
-                <button class="like-btn" :class="{ active: liked[selectedArticle.id] }"
-                  @click="toggleLike(selectedArticle.id)">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M7 11v10M3 13v6a2 2 0 002 2h11.6a2 2 0 002-1.6l1.3-8A2 2 0 0017.9 9H14V5a3 3 0 00-3-3l-1 1-3 6v2"
-                      :fill="liked[selectedArticle.id] ? 'currentColor' : 'none'" stroke="currentColor"
-                      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                  <span>{{ likes[selectedArticle.id] ?? 0 }}</span>
+                <button
+                  class="like-btn"
+                  :class="{ active: liked[selectedArticle.id] }"
+                  @click="toggleLike(selectedArticle.id)"
+                >
+                  👍 <span>{{ selectedArticle.upvotes ?? 0 }}</span>
                 </button>
-                <span class="like-hint">{{ liked[selectedArticle.id] ? 'Danke für dein Like!' : 'Hilf anderen, gute Nachrichten zu finden.' }}</span>
+
+                <button
+                  class="like-btn dislike"
+                  :class="{ active: disliked[selectedArticle.id] }"
+                  @click="toggleDislike(selectedArticle.id)"
+                >
+                  👎 <span>{{ selectedArticle.downvotes ?? 0 }}</span>
+                </button>
+
+                <span class="like-hint">
+                  {{
+                    liked[selectedArticle.id]
+                      ? 'Danke für dein Like!'
+                      : disliked[selectedArticle.id]
+                        ? 'Danke für dein Feedback!'
+                        : user
+                          ? 'Hilf anderen, gute Nachrichten zu finden.'
+                          : 'Zum Bewerten bitte anmelden.'
+                  }}
+                </span>
               </div>
 
-              <!-- Kommentare -->
               <div class="comments">
                 <h4 class="comments-title">
                   Kommentare
@@ -544,8 +568,9 @@ function loadMoreArticles() {
                   <p v-if="(comments[selectedArticle.id] ?? []).length === 0" class="comments-empty">
                     Noch keine Kommentare – schreib den ersten.
                   </p>
+
                   <div v-for="(c, idx) in (comments[selectedArticle.id] ?? [])" :key="idx" class="comment">
-                    <div class="comment-avatar">{{ c.author[0] }}</div>
+                    <div class="comment-avatar">{{ c.author?.[0] ?? 'U' }}</div>
                     <div class="comment-body">
                       <div class="comment-meta">
                         <strong>{{ c.author }}</strong>
@@ -557,11 +582,27 @@ function loadMoreArticles() {
                 </div>
 
                 <div class="comment-form">
-                  <textarea v-model="commentInput" class="comment-input" placeholder="Dein Kommentar …" rows="2"
+                  <textarea
+                    v-model="commentInput"
+                    class="comment-input"
+                    placeholder="Dein Kommentar …"
+                    rows="2"
                     @keydown.ctrl.enter="submitComment(selectedArticle.id)"
-                    @keydown.meta.enter="submitComment(selectedArticle.id)"></textarea>
-                  <button class="btn-send" :disabled="!commentInput.trim()" @click="submitComment(selectedArticle.id)">
+                    @keydown.meta.enter="submitComment(selectedArticle.id)"
+                  ></textarea>
+
+                  <button
+                    class="btn-send"
+                    :disabled="!commentInput.trim()"
+                    @click="submitComment(selectedArticle.id)"
+                  >
                     Senden
+                  </button>
+                </div>
+
+                <div style="margin-top: 12px">
+                  <button class="btn-send" @click="handleDeleteArticle(selectedArticle.id)">
+                    Artikel löschen
                   </button>
                 </div>
               </div>
@@ -574,7 +615,11 @@ function loadMoreArticles() {
 </template>
 
 <style scoped>
-/* ─── RESET ──────────────────────────────────────────── */
+.like-btn.dislike.active {
+  background: #b42318;
+  border-color: #b42318;
+  color: #fff;
+}
 * {
   margin: 0;
   padding: 0;
@@ -593,7 +638,6 @@ function loadMoreArticles() {
   --c-accent: #2d8a3e;
   --c-accent-light: #e8f5e9;
   --c-accent-hover: #24712f;
-  --c-dark: #1d1d1f;
   --radius-s: 8px;
   --radius-m: 12px;
   --radius-l: 20px;
@@ -610,14 +654,12 @@ function loadMoreArticles() {
   min-height: 100vh;
 }
 
-/* ─── HEADER ─────────────────────────────────────────── */
 .header {
   position: sticky;
   top: 0;
   z-index: 100;
   background: rgba(255, 255, 255, .72);
   backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--c-border-light);
 }
 
@@ -697,12 +739,14 @@ function loadMoreArticles() {
   font-size: 13px;
   background: var(--c-surface);
   outline: none;
-  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-.search-field:focus {
-  border-color: var(--c-accent);
-  box-shadow: 0 0 0 3px rgba(45, 138, 62, .12);
+.btn-login,
+.btn-seed,
+.btn-load-more,
+.btn-send,
+.auth-submit {
+  cursor: pointer;
 }
 
 .btn-login {
@@ -712,15 +756,137 @@ function loadMoreArticles() {
   background: var(--c-accent);
   padding: 6px 16px;
   border-radius: var(--radius-s);
+  border: none;
   text-decoration: none;
-  transition: background var(--transition);
 }
 
 .btn-login:hover {
   background: var(--c-accent-hover);
 }
 
-/* ─── LOADING ────────────────────────────────────────── */
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-label {
+  font-size: 13px;
+  color: var(--c-text-secondary);
+  white-space: nowrap;
+}
+
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, .42);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .22);
+  position: relative;
+}
+
+.auth-close {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--c-surface);
+  cursor: pointer;
+  font-size: 22px;
+  color: var(--c-text-secondary);
+}
+
+.auth-tabs {
+  display: flex;
+  background: var(--c-surface);
+  padding: 4px;
+  border-radius: 999px;
+  margin-bottom: 22px;
+}
+
+.auth-tab {
+  flex: 1;
+  height: 34px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-secondary);
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.auth-tab.active {
+  background: #fff;
+  color: var(--c-accent);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+}
+
+.auth-card h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  font-size: 13px;
+  color: var(--c-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.auth-input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  padding: 0 14px;
+  font-size: 14px;
+  background: var(--c-surface);
+  outline: none;
+  margin-bottom: 12px;
+}
+
+.auth-error {
+  font-size: 13px;
+  color: #b42318;
+  background: #fff1f0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.auth-submit {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 14px;
+  background: var(--c-accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.auth-submit:hover {
+  background: var(--c-accent-hover);
+}
+
 .loading-state {
   text-align: center;
   padding: 120px 24px;
@@ -740,11 +906,10 @@ function loadMoreArticles() {
 
 @keyframes spin {
   to {
-    transform: rotate(360deg)
+    transform: rotate(360deg);
   }
 }
 
-/* ─── MAIN ───────────────────────────────────────────── */
 .main {
   max-width: 1120px;
   margin: 0 auto;
@@ -770,27 +935,14 @@ function loadMoreArticles() {
   border: 1px solid var(--c-border);
   border-radius: var(--radius-s);
   background: #fff;
-  cursor: pointer;
-  transition: background var(--transition);
-}
-
-.btn-seed:hover {
-  background: var(--c-surface);
-}
-
-.btn-seed:disabled {
-  opacity: .5;
-  cursor: default;
 }
 
 .dateline {
   font-size: 13px;
   color: var(--c-text-tertiary);
   margin-bottom: 28px;
-  letter-spacing: .01em;
 }
 
-/* ─── GRID LAYOUT ────────────────────────────────────── */
 .grid-layout {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -800,7 +952,6 @@ function loadMoreArticles() {
 @media (max-width: 960px) {
   .grid-layout {
     grid-template-columns: 1fr;
-    gap: 40px;
   }
 
   .nav-links {
@@ -812,17 +963,17 @@ function loadMoreArticles() {
   }
 }
 
-/* ─── FEATURED ───────────────────────────────────────── */
 .featured {
   border-radius: var(--radius-l);
   overflow: hidden;
   background: var(--c-surface);
   cursor: pointer;
-  transition: transform var(--transition), box-shadow var(--transition);
   margin-bottom: 40px;
+  transition: transform var(--transition), box-shadow var(--transition);
 }
 
-.featured:hover {
+.featured:hover,
+.card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-card);
 }
@@ -842,10 +993,8 @@ function loadMoreArticles() {
   font-family: var(--font-display);
   font-size: 28px;
   font-weight: 700;
-  letter-spacing: -0.5px;
   line-height: 1.2;
   margin: 12px 0 10px;
-  color: var(--c-text-primary);
 }
 
 .featured-summary {
@@ -855,12 +1004,10 @@ function loadMoreArticles() {
   margin-bottom: 16px;
 }
 
-/* ─── BADGE ──────────────────────────────────────────── */
 .badge {
   display: inline-block;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: .03em;
   text-transform: uppercase;
   padding: 3px 10px;
   border-radius: 6px;
@@ -874,7 +1021,6 @@ function loadMoreArticles() {
   color: var(--c-text-secondary);
 }
 
-/* ─── META ───────────────────────────────────────────── */
 .meta {
   display: flex;
   align-items: center;
@@ -888,19 +1034,15 @@ function loadMoreArticles() {
   height: 3px;
   border-radius: 50%;
   background: var(--c-text-tertiary);
-  flex-shrink: 0;
 }
 
-/* ─── SECTION TITLE ──────────────────────────────────── */
 .section-title {
   font-family: var(--font-display);
   font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.3px;
   margin-bottom: 20px;
 }
 
-/* ─── CARDS ──────────────────────────────────────────── */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -928,11 +1070,6 @@ function loadMoreArticles() {
   transition: transform var(--transition), box-shadow var(--transition);
 }
 
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-card);
-}
-
 .card-img {
   width: 100%;
   height: 160px;
@@ -955,12 +1092,6 @@ function loadMoreArticles() {
   font-size: 15px;
   font-weight: 600;
   line-height: 1.35;
-  letter-spacing: -0.1px;
-  color: var(--c-text-primary);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .load-more-wrap {
@@ -975,16 +1106,9 @@ function loadMoreArticles() {
   border: 1px solid var(--c-accent);
   padding: 10px 36px;
   border-radius: var(--radius-s);
-  text-decoration: none;
-  transition: background var(--transition), color var(--transition);
+  background: transparent;
 }
 
-.btn-load-more:hover {
-  background: var(--c-accent);
-  color: #fff;
-}
-
-/* ─── SIDEBAR ────────────────────────────────────────── */
 .widget {
   padding: 24px;
   background: var(--c-bg);
@@ -998,7 +1122,6 @@ function loadMoreArticles() {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 12px;
-  letter-spacing: -0.1px;
 }
 
 .tag-cloud {
@@ -1015,16 +1138,8 @@ function loadMoreArticles() {
   border-radius: 999px;
   text-decoration: none;
   color: var(--c-text-secondary);
-  transition: background var(--transition), color var(--transition);
 }
 
-.tag:hover {
-  background: var(--c-accent-light);
-  color: var(--c-accent);
-  border-color: var(--c-accent-light);
-}
-
-/* ─── RANK LIST ──────────────────────────────────────── */
 .rank-list {
   list-style: none;
 }
@@ -1036,19 +1151,6 @@ function loadMoreArticles() {
   padding: 14px 0;
   border-bottom: 1px solid var(--c-border-light);
   cursor: pointer;
-  transition: background var(--transition);
-}
-
-.rank-item:last-child {
-  border-bottom: none;
-}
-
-.rank-item:hover {
-  background: var(--c-surface);
-  margin: 0 -12px;
-  padding-left: 12px;
-  padding-right: 12px;
-  border-radius: var(--radius-s);
 }
 
 .rank-num {
@@ -1057,19 +1159,12 @@ function loadMoreArticles() {
   font-weight: 700;
   color: var(--c-border);
   min-width: 24px;
-  line-height: 1;
-  padding-top: 2px;
-}
-
-.rank-info {
-  flex: 1;
 }
 
 .rank-title {
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
-  color: var(--c-text-primary);
   margin-bottom: 4px;
 }
 
@@ -1078,7 +1173,6 @@ function loadMoreArticles() {
   color: var(--c-text-tertiary);
 }
 
-/* ─── FOOTER ─────────────────────────────────────────── */
 .footer {
   border-top: 1px solid var(--c-border-light);
   background: var(--c-surface);
@@ -1088,45 +1182,12 @@ function loadMoreArticles() {
   max-width: 1120px;
   margin: 0 auto;
   padding: 48px 24px 32px;
-  display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr;
-  gap: 40px;
-}
-
-@media (max-width: 720px) {
-  .footer-inner {
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
 }
 
 .footer-desc {
   font-size: 13px;
   color: var(--c-text-tertiary);
-  line-height: 1.5;
   margin-top: 8px;
-}
-
-.footer-col h6 {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: var(--c-text-secondary);
-  margin-bottom: 14px;
-}
-
-.footer-col a {
-  display: block;
-  font-size: 13px;
-  color: var(--c-text-tertiary);
-  text-decoration: none;
-  padding: 3px 0;
-  transition: color var(--transition);
-}
-
-.footer-col a:hover {
-  color: var(--c-text-primary);
 }
 
 .footer-bottom {
@@ -1137,8 +1198,6 @@ function loadMoreArticles() {
   color: var(--c-text-tertiary);
   font-size: 12px;
 }
-
-/* ─── MODAL ──────────────────────────────────────────── */
 
 .hp-overlay {
   position: fixed;
@@ -1180,16 +1239,9 @@ function loadMoreArticles() {
   border: none;
   background: var(--c-surface);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
   color: var(--c-text-secondary);
-  transition: background var(--transition);
-}
-
-.hp-dialog-close:hover {
-  background: var(--c-surface-hover);
+  font-size: 22px;
 }
 
 .hp-dialog-scroll {
@@ -1212,9 +1264,7 @@ function loadMoreArticles() {
   font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
-  letter-spacing: -0.4px;
   line-height: 1.25;
-  color: var(--c-text-primary);
   margin-bottom: 8px;
 }
 
@@ -1232,7 +1282,6 @@ function loadMoreArticles() {
 .btn-original {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   font-size: 13px;
   font-weight: 500;
   color: var(--c-accent);
@@ -1240,16 +1289,9 @@ function loadMoreArticles() {
   padding: 8px 20px;
   border-radius: var(--radius-s);
   text-decoration: none;
-  transition: background var(--transition), color var(--transition);
   margin-bottom: 28px;
 }
 
-.btn-original:hover {
-  background: var(--c-accent);
-  color: #fff;
-}
-
-/* ─── LIKE ROW ───────────────────────────────────────── */
 .like-row {
   display: flex;
   align-items: center;
@@ -1272,12 +1314,6 @@ function loadMoreArticles() {
   font-size: 14px;
   font-weight: 600;
   color: var(--c-text-secondary);
-  transition: all var(--transition);
-}
-
-.like-btn:hover {
-  border-color: var(--c-accent);
-  color: var(--c-accent);
 }
 
 .like-btn.active {
@@ -1286,23 +1322,15 @@ function loadMoreArticles() {
   color: #fff;
 }
 
-.like-btn.active:hover {
-  background: var(--c-accent-hover);
-  border-color: var(--c-accent-hover);
-  color: #fff;
-}
-
 .like-hint {
   font-size: 12px;
   color: var(--c-text-tertiary);
 }
 
-/* ─── COMMENTS ───────────────────────────────────────── */
 .comments {
   background: var(--c-surface);
   border-radius: var(--radius-l);
   padding: 24px;
-  margin-top: 8px;
 }
 
 .comments-title {
@@ -1313,7 +1341,6 @@ function loadMoreArticles() {
 }
 
 .comments-count {
-  font-weight: 400;
   color: var(--c-text-tertiary);
   font-size: 14px;
 }
@@ -1348,7 +1375,6 @@ function loadMoreArticles() {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .comment-body {
@@ -1360,21 +1386,14 @@ function loadMoreArticles() {
 
 .comment-meta {
   display: flex;
-  align-items: center;
   gap: 8px;
   margin-bottom: 4px;
   font-size: 12px;
   color: var(--c-text-tertiary);
 }
 
-.comment-meta strong {
-  color: var(--c-text-primary);
-}
-
 .comment-body p {
-  margin: 0;
   font-size: 13px;
-  color: var(--c-text-primary);
   line-height: 1.5;
 }
 
@@ -1395,14 +1414,6 @@ function loadMoreArticles() {
   resize: none;
   outline: none;
   font-family: inherit;
-  color: var(--c-text-primary);
-  background: #fff;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-.comment-input:focus {
-  border-color: var(--c-accent);
-  box-shadow: 0 0 0 3px rgba(45, 138, 62, .1);
 }
 
 .btn-send {
@@ -1413,54 +1424,42 @@ function loadMoreArticles() {
   border: none;
   padding: 10px 24px;
   border-radius: var(--radius-m);
-  cursor: pointer;
-  transition: background var(--transition), transform var(--transition);
-  white-space: nowrap;
-}
-
-.btn-send:hover {
-  background: var(--c-accent-hover);
-  transform: scale(1.02);
 }
 
 .btn-send:disabled {
   opacity: .35;
   cursor: default;
-  transform: none;
 }
 </style>
 
 <style>
-.hp-fade-enter-active {
+.hp-fade-enter-active,
+.hp-fade-leave-active,
+.auth-fade-enter-active,
+.auth-fade-leave-active {
   transition: opacity .25s ease;
 }
 
-.hp-fade-leave-active {
-  transition: opacity .2s ease;
-}
-
-.hp-fade-enter-active .hp-dialog {
-  transition: transform .3s cubic-bezier(.16, 1, .3, 1), opacity .25s ease;
-}
-
-.hp-fade-leave-active .hp-dialog {
-  transition: transform .2s ease, opacity .2s ease;
-}
-
-.hp-fade-enter-from {
+.hp-fade-enter-from,
+.hp-fade-leave-to,
+.auth-fade-enter-from,
+.auth-fade-leave-to {
   opacity: 0;
 }
 
-.hp-fade-enter-from .hp-dialog {
+.hp-fade-enter-active .hp-dialog,
+.auth-fade-enter-active .auth-card {
+  transition: transform .3s cubic-bezier(.16, 1, .3, 1), opacity .25s ease;
+}
+
+.hp-fade-enter-from .hp-dialog,
+.auth-fade-enter-from .auth-card {
   opacity: 0;
   transform: translateY(24px) scale(.97);
 }
 
-.hp-fade-leave-to {
-  opacity: 0;
-}
-
-.hp-fade-leave-to .hp-dialog {
+.hp-fade-leave-to .hp-dialog,
+.auth-fade-leave-to .auth-card {
   opacity: 0;
   transform: translateY(12px) scale(.98);
 }
