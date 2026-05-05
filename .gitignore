@@ -20,4 +20,6 @@ appsettings.Development.json
 .vscode/
 .idea/
 .DS_Store
-Thumbs.db
+Thumbs.db.vs/ 
+bin/ 
+obj/ 
